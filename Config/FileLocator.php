@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Component\HttpKernel\DependencyInjection\Loader;
+namespace Symfony\Component\HttpKernel\Config;
 
-use Symfony\Component\DependencyInjection\Loader\FileLocator as BaseFileLocator;
+use Symfony\Component\Config\FileLocator as BaseFileLocator;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
@@ -39,12 +39,12 @@ class FileLocator extends BaseFileLocator
     /**
      * {@inheritdoc}
      */
-    public function locate($file, $currentPath = null)
+    public function locate($file, $currentPath = null, $first = true)
     {
         if ('@' === $file[0]) {
-            return $this->kernel->locateResource($file);
+            return $this->kernel->locateResource($file, $currentPath, $first);
         }
 
-        return parent::locate($file, $currentPath);
+        return parent::locate($file, $currentPath, $first);
     }
 }
