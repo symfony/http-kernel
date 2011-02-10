@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Component\HttpKernel\DependencyInjection\Loader;
+namespace Symfony\Component\HttpKernel\Config\Loader;
 
-use Symfony\Component\DependencyInjection\Loader\FileLocator as BaseFileLocator;
+use Symfony\Component\Config\Loader\FileLocator as BaseFileLocator;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
