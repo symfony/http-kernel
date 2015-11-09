@@ -9,4 +9,4 @@ before_install:
 
 install: composer update --prefer-source
 
-script: phpunit --coverage-text
+script: phpunit
