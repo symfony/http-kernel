@@ -65,11 +65,17 @@ class EnvParametersResource implements SelfCheckingResourceInterface, \Serializa
         return $this->findVariables() === $this->variables;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function serialize()
     {
         return serialize(array('prefix' => $this->prefix, 'variables' => $this->variables));
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function unserialize($serialized)
     {
         $unserialized = unserialize($serialized);
@@ -78,6 +84,11 @@ class EnvParametersResource implements SelfCheckingResourceInterface, \Serializa
         $this->variables = $unserialized['variables'];
     }
 
+    /**
+     * Retrieves server and execution environment information.
+     *
+     * @return array
+     */
     private function findVariables()
     {
         $variables = array();

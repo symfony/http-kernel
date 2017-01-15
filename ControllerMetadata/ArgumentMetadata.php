@@ -18,14 +18,39 @@ namespace Symfony\Component\HttpKernel\ControllerMetadata;
  */
 class ArgumentMetadata
 {
+    /**
+     * @var string
+     */
     private $name;
+
+    /**
+     * @var string
+     */
     private $type;
+
+    /**
+     * @var bool
+     */
     private $isVariadic;
+
+    /**
+     * @var bool
+     */
     private $hasDefaultValue;
+
+    /**
+     * @var mixed
+     */
     private $defaultValue;
+
+    /**
+     * @var bool
+     */
     private $isNullable;
 
     /**
+     * Constructor.
+     *
      * @param string $name
      * @param string $type
      * @param bool   $isVariadic

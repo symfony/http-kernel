@@ -19,9 +19,22 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class TraceableArgumentResolver implements ArgumentResolverInterface
 {
+    /**
+     * @var ArgumentResolverInterface
+     */
     private $resolver;
+
+    /**
+     * @var Stopwatch
+     */
     private $stopwatch;
 
+    /**
+     * Constructor.
+     *
+     * @param ArgumentResolverInterface $resolver
+     * @param Stopwatch                 $stopwatch
+     */
     public function __construct(ArgumentResolverInterface $resolver, Stopwatch $stopwatch)
     {
         $this->resolver = $resolver;

@@ -23,8 +23,16 @@ use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcherInterface;
  */
 class EventDataCollector extends DataCollector implements LateDataCollectorInterface
 {
+    /**
+     * @var null|EventDispatcherInterface
+     */
     protected $dispatcher;
 
+    /**
+     * Constructor.
+     *
+     * @param EventDispatcherInterface|null $dispatcher
+     */
     public function __construct(EventDispatcherInterface $dispatcher = null)
     {
         $this->dispatcher = $dispatcher;
@@ -41,6 +49,9 @@ class EventDataCollector extends DataCollector implements LateDataCollectorInter
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function lateCollect()
     {
         if ($this->dispatcher instanceof TraceableEventDispatcherInterface) {

@@ -23,8 +23,14 @@ use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
  */
 class RouterDataCollector extends DataCollector
 {
+    /**
+     * @var \SplObjectStorage
+     */
     protected $controllers;
 
+    /**
+     * Constructor.
+     */
     public function __construct()
     {
         $this->controllers = new \SplObjectStorage();
@@ -53,11 +59,6 @@ class RouterDataCollector extends DataCollector
         unset($this->controllers[$request]);
     }
 
-    protected function guessRoute(Request $request, $controller)
-    {
-        return 'n/a';
-    }
-
     /**
      * Remembers the controller associated to each request.
      *
@@ -69,6 +70,8 @@ class RouterDataCollector extends DataCollector
     }
 
     /**
+     * Gets redirect.
+     *
      * @return bool Whether this request will result in a redirect
      */
     public function getRedirect()
@@ -77,6 +80,8 @@ class RouterDataCollector extends DataCollector
     }
 
     /**
+     * Gets target url.
+     *
      * @return string|null The target URL
      */
     public function getTargetUrl()
@@ -85,6 +90,8 @@ class RouterDataCollector extends DataCollector
     }
 
     /**
+     * Gets target route.
+     *
      * @return string|null The target route
      */
     public function getTargetRoute()
@@ -98,5 +105,18 @@ class RouterDataCollector extends DataCollector
     public function getName()
     {
         return 'router';
+    }
+
+    /**
+     * Guess route.
+     *
+     * @param Request $request
+     * @param string  $controller
+     *
+     * @return string
+     */
+    protected function guessRoute(Request $request, $controller)
+    {
+        return 'n/a';
     }
 }

@@ -23,8 +23,16 @@ use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
  */
 class LoggerDataCollector extends DataCollector implements LateDataCollectorInterface
 {
+    /**
+     * @var null|DebugLoggerInterface
+     */
     private $logger;
 
+    /**
+     * Constructor.
+     *
+     * @param null $logger
+     */
     public function __construct($logger = null)
     {
         if (null !== $logger && $logger instanceof DebugLoggerInterface) {
@@ -61,26 +69,51 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         return isset($this->data['logs']) ? $this->data['logs'] : array();
     }
 
+    /**
+     * Gets priorities.
+     *
+     * @return array An array of priorities
+     */
     public function getPriorities()
     {
         return isset($this->data['priorities']) ? $this->data['priorities'] : array();
     }
 
+    /**
+     * Gets count errors.
+     *
+     * @return int
+     */
     public function countErrors()
     {
         return isset($this->data['error_count']) ? $this->data['error_count'] : 0;
     }
 
+    /**
+     * Gets count deprecations.
+     *
+     * @return int
+     */
     public function countDeprecations()
     {
         return isset($this->data['deprecation_count']) ? $this->data['deprecation_count'] : 0;
     }
 
+    /**
+     * Gets count warning.
+     *
+     * @return int
+     */
     public function countWarnings()
     {
         return isset($this->data['warning_count']) ? $this->data['warning_count'] : 0;
     }
 
+    /**
+     * Get count screams.
+     *
+     * @return int
+     */
     public function countScreams()
     {
         return isset($this->data['scream_count']) ? $this->data['scream_count'] : 0;
@@ -94,7 +127,14 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         return 'logger';
     }
 
-    private function sanitizeLogs($logs)
+    /**
+     * Sanitize logs.
+     *
+     * @param array $logs
+     *
+     * @return array
+     */
+    private function sanitizeLogs(array $logs)
     {
         $sanitizedLogs = array();
 
@@ -126,6 +166,13 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         return array_values($sanitizedLogs);
     }
 
+    /**
+     * Returns whether error log context is silenced or depreciation.
+     *
+     * @param array $log
+     *
+     * @return bool
+     */
     private function isSilencedOrDeprecationErrorLog(array $log)
     {
         if (!isset($log['context']['exception'])) {
@@ -145,6 +192,11 @@ class LoggerDataCollector extends DataCollector implements LateDataCollectorInte
         return false;
     }
 
+    /**
+     * Compute errors count.
+     *
+     * @return array
+     */
     private function computeErrorsCount()
     {
         $count = array(
