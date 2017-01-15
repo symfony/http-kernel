@@ -90,6 +90,13 @@ class ValueExporter
         return (string) $value;
     }
 
+    /**
+     * Return incomplete class name.
+     *
+     * @param \__PHP_Incomplete_Class $value
+     *
+     * @return mixed
+     */
     private function getClassNameFromIncomplete(\__PHP_Incomplete_Class $value)
     {
         $array = new \ArrayObject($value);

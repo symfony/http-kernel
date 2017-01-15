@@ -27,7 +27,15 @@ class ConfigDataCollector extends DataCollector
      * @var KernelInterface
      */
     private $kernel;
+
+    /**
+     * @var string|null
+     */
     private $name;
+
+    /**
+     * @var string|null
+     */
     private $version;
 
     /**
@@ -96,11 +104,21 @@ class ConfigDataCollector extends DataCollector
         }
     }
 
+    /**
+     * Gets the application name.
+     *
+     * @return string
+     */
     public function getApplicationName()
     {
         return $this->data['app_name'];
     }
 
+    /**
+     * Gets the application version.
+     *
+     * @return string
+     */
     public function getApplicationVersion()
     {
         return $this->data['app_version'];
@@ -190,6 +208,8 @@ class ConfigDataCollector extends DataCollector
     }
 
     /**
+     * Gets the PHP architecture.
+     *
      * @return int The PHP architecture as number of bits (e.g. 32 or 64)
      */
     public function getPhpArchitecture()
@@ -198,6 +218,8 @@ class ConfigDataCollector extends DataCollector
     }
 
     /**
+     * Gets PHP Intl locale.
+     *
      * @return string
      */
     public function getPhpIntlLocale()
@@ -206,6 +228,8 @@ class ConfigDataCollector extends DataCollector
     }
 
     /**
+     * Gets PHP timezone.
+     *
      * @return string
      */
     public function getPhpTimezone()
@@ -273,6 +297,11 @@ class ConfigDataCollector extends DataCollector
         return $this->data['zend_opcache_enabled'];
     }
 
+    /**
+     * Gets the bundles.
+     *
+     * @return array
+     */
     public function getBundles()
     {
         return $this->data['bundles'];

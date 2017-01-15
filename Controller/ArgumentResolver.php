@@ -26,6 +26,9 @@ use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactoryInter
  */
 final class ArgumentResolver implements ArgumentResolverInterface
 {
+    /**
+     * @var ArgumentMetadataFactory
+     */
     private $argumentMetadataFactory;
 
     /**
@@ -33,6 +36,12 @@ final class ArgumentResolver implements ArgumentResolverInterface
      */
     private $argumentValueResolvers;
 
+    /**
+     * Constructor.
+     *
+     * @param ArgumentMetadataFactoryInterface|null $argumentMetadataFactory
+     * @param array                                 $argumentValueResolvers
+     */
     public function __construct(ArgumentMetadataFactoryInterface $argumentMetadataFactory = null, array $argumentValueResolvers = array())
     {
         $this->argumentMetadataFactory = $argumentMetadataFactory ?: new ArgumentMetadataFactory();
@@ -80,6 +89,11 @@ final class ArgumentResolver implements ArgumentResolverInterface
         return $arguments;
     }
 
+    /**
+     * Get default argument value resolvers.
+     *
+     * @return array
+     */
     public static function getDefaultArgumentValueResolvers()
     {
         return array(

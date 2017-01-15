@@ -25,6 +25,9 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ControllerResolver implements ArgumentResolverInterface, ControllerResolverInterface
 {
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
     /**
@@ -137,6 +140,7 @@ class ControllerResolver implements ArgumentResolverInterface, ControllerResolve
 
         $attributes = $request->attributes->all();
         $arguments = array();
+
         foreach ($parameters as $param) {
             if (array_key_exists($param->name, $attributes)) {
                 if ($this->supportsVariadic && $param->isVariadic() && is_array($attributes[$param->name])) {
@@ -202,6 +206,13 @@ class ControllerResolver implements ArgumentResolverInterface, ControllerResolve
         return new $class();
     }
 
+    /**
+     * Returns controller error.
+     *
+     * @param string|array|object $callable
+     *
+     * @return string
+     */
     private function getControllerError($callable)
     {
         if (is_string($callable)) {

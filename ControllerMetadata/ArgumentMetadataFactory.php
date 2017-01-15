@@ -36,6 +36,9 @@ final class ArgumentMetadataFactory implements ArgumentMetadataFactoryInterface
      */
     private $supportsParameterType;
 
+    /**
+     * constructor.
+     */
     public function __construct()
     {
         $this->supportsVariadic = method_exists('ReflectionParameter', 'isVariadic');
@@ -111,12 +114,14 @@ final class ArgumentMetadataFactory implements ArgumentMetadataFactoryInterface
     {
         if ($this->supportsParameterType) {
             if (!$type = $parameter->getType()) {
-                return;
+                return null;
             }
+
             $typeName = $type instanceof \ReflectionNamedType ? $type->getName() : $type->__toString();
+
             if ('array' === $typeName && !$type->isBuiltin()) {
                 // Special case for HHVM with variadics
-                return;
+                return null;
             }
 
             return $typeName;
@@ -125,5 +130,7 @@ final class ArgumentMetadataFactory implements ArgumentMetadataFactoryInterface
         if (preg_match('/^(?:[^ ]++ ){4}([a-zA-Z_\x7F-\xFF][^ ]++)/', $parameter, $info)) {
             return $info[1];
         }
+
+        return null;
     }
 }

@@ -18,13 +18,28 @@ use Psr\Cache\CacheItemPoolInterface;
  */
 class Psr6CacheClearer implements CacheClearerInterface
 {
+    /**
+     * @var array
+     */
     private $pools = array();
 
+    /**
+     * Constructor.
+     *
+     * @param array $pools
+     */
     public function __construct(array $pools = array())
     {
         $this->pools = $pools;
     }
 
+    /**
+     * Adds an pool.
+     *
+     * @param CacheItemPoolInterface $pool
+     *
+     * @deprecated since version 3.3 and will be removed in 4.0. Pass an array of pools indexed by name to the constructor instead.
+     */
     public function addPool(CacheItemPoolInterface $pool)
     {
         @trigger_error(sprintf('The %s() method is deprecated since version 3.3 and will be removed in 4.0. Pass an array of pools indexed by name to the constructor instead.', __METHOD__), E_USER_DEPRECATED);
@@ -32,11 +47,25 @@ class Psr6CacheClearer implements CacheClearerInterface
         $this->pools[] = $pool;
     }
 
+    /**
+     * Returns true if the pool exists, false otherwise.
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
     public function hasPool($name)
     {
         return isset($this->pools[$name]);
     }
 
+    /**
+     * Clears all pools for a given name.
+     *
+     * @param string $name
+     *
+     * @return CacheItemPoolInterface
+     */
     public function clearPool($name)
     {
         if (!isset($this->pools[$name])) {

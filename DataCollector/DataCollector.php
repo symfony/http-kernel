@@ -30,6 +30,9 @@ use Symfony\Component\VarDumper\Cloner\VarCloner;
  */
 abstract class DataCollector implements DataCollectorInterface, \Serializable
 {
+    /**
+     * @var array
+     */
     protected $data = array();
 
     /**
@@ -42,13 +45,22 @@ abstract class DataCollector implements DataCollectorInterface, \Serializable
      */
     private $cloner;
 
+    /**
+     * @var array
+     */
     private static $stubsCache = array();
 
+    /**
+     * {@inheritdoc}
+     */
     public function serialize()
     {
         return serialize($this->data);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function unserialize($data)
     {
         $this->data = unserialize($data);
@@ -111,6 +123,13 @@ abstract class DataCollector implements DataCollectorInterface, \Serializable
         return $this->valueExporter->exportValue($var);
     }
 
+    /**
+     * Returns decorate var.
+     *
+     * @param array|string $var
+     *
+     * @return array|ClassStub|LinkStub
+     */
     private function decorateVar($var)
     {
         if (is_array($var)) {

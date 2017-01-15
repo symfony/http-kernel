@@ -26,9 +26,14 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class RequestDataCollector extends DataCollector implements EventSubscriberInterface
 {
-    /** @var \SplObjectStorage */
+    /**
+     * @var \SplObjectStorage
+     */
     protected $controllers;
 
+    /**
+     * Constructor.
+     */
     public function __construct()
     {
         $this->controllers = new \SplObjectStorage();
@@ -42,6 +47,7 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         // attributes are serialized and as they can be anything, they need to be converted to strings.
         $attributes = array();
         $route = '';
+
         foreach ($request->attributes->all() as $key => $value) {
             if ('_route' === $key) {
                 $route = is_object($value) ? $value->getPath() : $value;
@@ -52,6 +58,7 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         }
 
         $content = null;
+
         try {
             $content = $request->getContent();
         } catch (\LogicException $e) {
@@ -63,8 +70,10 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         $sessionAttributes = array();
         $session = null;
         $flashes = array();
+
         if ($request->hasSession()) {
             $session = $request->getSession();
+
             if ($session->isStarted()) {
                 $sessionMetadata['Created'] = date(DATE_RFC822, $session->getMetadataBag()->getCreated());
                 $sessionMetadata['Last used'] = date(DATE_RFC822, $session->getMetadataBag()->getLastUsed());
@@ -115,9 +124,13 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
             if (!is_array($value)) {
                 continue;
             }
+
             if ('request_headers' === $key || 'response_headers' === $key) {
-                $value = array_map(function ($v) { return isset($v[0]) && !isset($v[1]) ? $v[0] : $v; }, $value);
+                $value = array_map(function ($v) {
+                    return isset($v[0]) && !isset($v[1]) ? $v[0]: $v;
+                }, $value);
             }
+
             if ('request_server' !== $key && 'request_cookies' !== $key) {
                 $this->data[$key] = array_map(array($this, 'cloneVar'), $value);
             }
@@ -146,91 +159,185 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         }
     }
 
+    /**
+     * Gets the request method.
+     *
+     * @return string
+     */
     public function getMethod()
     {
         return $this->data['method'];
     }
 
+    /**
+     * Returns the path being requested relative to the executed script.
+     *
+     * @return string
+     */
     public function getPathInfo()
     {
         return $this->data['path_info'];
     }
 
+    /**
+     * Returns request body parameters ($_POST).
+     *
+     * @return ParameterBag
+     */
     public function getRequestRequest()
     {
         return new ParameterBag($this->data['request_request']);
     }
 
+    /**
+     * Returns query string parameters.
+     *
+     * @return ParameterBag
+     */
     public function getRequestQuery()
     {
         return new ParameterBag($this->data['request_query']);
     }
 
+    /**
+     * Returns headers (taken from the $_SERVER).
+     *
+     * @return ParameterBag
+     */
     public function getRequestHeaders()
     {
         return new ParameterBag($this->data['request_headers']);
     }
 
+    /**
+     * Retrieves server and execution environment parameters ($_SERVER).
+     *
+     * @param bool $raw
+     *
+     * @return ParameterBag
+     */
     public function getRequestServer($raw = false)
     {
         return new ParameterBag($raw ? $this->data['request_server'] : array_map(array($this, 'cloneVar'), $this->data['request_server']));
     }
 
+    /**
+     * Gets cookies ($_COOKIE).
+     *
+     * @param bool $raw
+     *
+     * @return ParameterBag
+     */
     public function getRequestCookies($raw = false)
     {
         return new ParameterBag($raw ? $this->data['request_cookies'] : array_map(array($this, 'cloneVar'), $this->data['request_cookies']));
     }
 
+    /**
+     * Gets attributes.
+     *
+     * @return ParameterBag
+     */
     public function getRequestAttributes()
     {
         return new ParameterBag($this->data['request_attributes']);
     }
 
+    /**
+     * Gets response headers.
+     *
+     * @return ParameterBag
+     */
     public function getResponseHeaders()
     {
         return new ParameterBag($this->data['response_headers']);
     }
 
+    /**
+     * Gets session metadata.
+     *
+     * @return array
+     */
     public function getSessionMetadata()
     {
         return $this->data['session_metadata'];
     }
 
+    /**
+     * Gets session attributes.
+     *
+     * @return array
+     */
     public function getSessionAttributes()
     {
         return $this->data['session_attributes'];
     }
 
+    /**
+     * Gets all flash messages.
+     *
+     * @return array
+     */
     public function getFlashes()
     {
         return $this->data['flashes'];
     }
 
+    /**
+     * Gets the current response content.
+     *
+     * @return string
+     */
     public function getContent()
     {
         return $this->data['content'];
     }
 
+    /**
+     * Retrieves Content-type based on the Request.
+     *
+     * @return string
+     */
     public function getContentType()
     {
         return $this->data['content_type'];
     }
 
+    /**
+     * Retrieves the status code translation table for the current web response.
+     *
+     * @return string
+     */
     public function getStatusText()
     {
         return $this->data['status_text'];
     }
 
+    /**
+     * Retrieves the status code for the current web response.
+     *
+     * @return int Status code
+     */
     public function getStatusCode()
     {
         return $this->data['status_code'];
     }
 
+    /**
+     * Gets the request format.
+     *
+     * @return string The request format
+     */
     public function getFormat()
     {
         return $this->data['format'];
     }
 
+    /**
+     * Get the locale.
+     *
+     * @return string
+     */
     public function getLocale()
     {
         return $this->data['locale'];
@@ -248,6 +355,11 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         return $this->data['route'];
     }
 
+    /**
+     * Gets identifier.
+     *
+     * @return string
+     */
     public function getIdentifier()
     {
         return $this->data['route'] ?: (is_array($this->data['controller']) ? $this->data['controller']['class'].'::'.$this->data['controller']['method'].'()' : $this->data['controller']);
@@ -302,11 +414,21 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         return isset($this->data['redirect']) ? $this->data['redirect'] : false;
     }
 
+    /**
+     * Remembers the controller associated to each request.
+     *
+     * @param FilterControllerEvent $event
+     */
     public function onKernelController(FilterControllerEvent $event)
     {
         $this->controllers[$event->getRequest()] = $event->getController();
     }
 
+    /**
+     * Filters the Response.
+     *
+     * @param FilterResponseEvent $event
+     */
     public function onKernelResponse(FilterResponseEvent $event)
     {
         if (!$event->isMasterRequest() || !$event->getRequest()->hasSession() || !$event->getRequest()->getSession()->isStarted()) {
@@ -318,6 +440,9 @@ class RequestDataCollector extends DataCollector implements EventSubscriberInter
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public static function getSubscribedEvents()
     {
         return array(

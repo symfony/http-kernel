@@ -28,9 +28,24 @@ abstract class Bundle implements BundleInterface
 {
     use ContainerAwareTrait;
 
+    /**
+     * @var string
+     */
     protected $name;
+
+    /**
+     * @var ExtensionInterface
+     */
     protected $extension;
+
+    /**
+     * @var string
+     */
     protected $path;
+
+    /**
+     * @var string
+     */
     private $namespace;
 
     /**
@@ -85,7 +100,8 @@ abstract class Bundle implements BundleInterface
                 if ($expectedAlias != $extension->getAlias()) {
                     throw new \LogicException(sprintf(
                         'Users will expect the alias of the default extension of a bundle to be the underscored version of the bundle name ("%s"). You can override "Bundle::getContainerExtension()" if you want to use "%s" or another alias.',
-                        $expectedAlias, $extension->getAlias()
+                        $expectedAlias,
+                        $extension->getAlias()
                     ));
                 }
 
@@ -98,6 +114,8 @@ abstract class Bundle implements BundleInterface
         if ($this->extension) {
             return $this->extension;
         }
+
+        return null;
     }
 
     /**
@@ -132,10 +150,11 @@ abstract class Bundle implements BundleInterface
     /**
      * Returns the bundle parent name.
      *
-     * @return string The Bundle parent name it overrides or null if no parent
+     * @return string|null The Bundle parent name it overrides or null if no parent
      */
     public function getParent()
     {
+        return null;
     }
 
     /**
@@ -176,19 +195,25 @@ abstract class Bundle implements BundleInterface
         $finder->files()->name('*Command.php')->in($dir);
 
         $prefix = $this->getNamespace().'\\Command';
+
         foreach ($finder as $file) {
             $ns = $prefix;
+
             if ($relativePath = $file->getRelativePath()) {
                 $ns .= '\\'.str_replace('/', '\\', $relativePath);
             }
+
             $class = $ns.'\\'.$file->getBasename('.php');
+
             if ($this->container) {
                 $alias = 'console.command.'.strtolower(str_replace('\\', '_', $class));
                 if ($this->container->has($alias)) {
                     continue;
                 }
             }
+
             $r = new \ReflectionClass($class);
+
             if ($r->isSubclassOf('Symfony\\Component\\Console\\Command\\Command') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
                 $application->add($r->newInstance());
             }
@@ -217,12 +242,18 @@ abstract class Bundle implements BundleInterface
         if (class_exists($class = $this->getContainerExtensionClass())) {
             return new $class();
         }
+
+        return null;
     }
 
+    /**
+     * Parse a class name.
+     */
     private function parseClassName()
     {
         $pos = strrpos(static::class, '\\');
         $this->namespace = false === $pos ? '' : substr(static::class, 0, $pos);
+
         if (null === $this->name) {
             $this->name = false === $pos ? static::class : substr(static::class, $pos + 1);
         }

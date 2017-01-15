@@ -22,22 +22,76 @@ use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 use Symfony\Component\VarDumper\Dumper\DataDumperInterface;
 
 /**
+ * DumpDataCollector.
+ *
  * @author Nicolas Grekas <p@tchwork.com>
  */
 class DumpDataCollector extends DataCollector implements DataDumperInterface
 {
+    /**
+     * @var Stopwatch|null
+     */
     private $stopwatch;
+
+    /**
+     * @var string
+     */
     private $fileLinkFormat;
+
+    /**
+     * @var int
+     */
     private $dataCount = 0;
+
+    /**
+     * @var bool
+     */
     private $isCollected = true;
+
+    /**
+     * @var int
+     */
     private $clonesCount = 0;
+
+    /**
+     * @var int
+     */
     private $clonesIndex = 0;
+
+    /**
+     * @var array
+     */
     private $rootRefs;
+
+    /**
+     * @var string
+     */
     private $charset;
+
+    /**
+     * @var RequestStack|null
+     */
     private $requestStack;
+
+    /**
+     * @var DataDumperInterface|null
+     */
     private $dumper;
+
+    /**
+     * @var bool
+     */
     private $dumperIsInjected;
 
+    /**
+     * Constructor.
+     *
+     * @param Stopwatch|null           $stopwatch
+     * @param string[null              $fileLinkFormat
+     * @param string[null              $charset
+     * @param RequestStack|null        $requestStack
+     * @param DataDumperInterface|null $dumper
+     */
     public function __construct(Stopwatch $stopwatch = null, $fileLinkFormat = null, $charset = null, RequestStack $requestStack = null, DataDumperInterface $dumper = null)
     {
         $this->stopwatch = $stopwatch;
@@ -56,16 +110,25 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function __clone()
     {
         $this->clonesIndex = ++$this->clonesCount;
     }
 
+    /**
+     * Dump data.
+     *
+     * @param Data $data
+     */
     public function dump(Data $data)
     {
         if ($this->stopwatch) {
             $this->stopwatch->start('dump');
         }
+
         if ($this->isCollected) {
             $this->isCollected = false;
         }
@@ -135,6 +198,9 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
         // Sub-requests and programmatic calls stay in the collected profile.
@@ -163,6 +229,9 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function serialize()
     {
         if ($this->clonesCount !== $this->clonesIndex) {
@@ -182,6 +251,9 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         return $ser;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function unserialize($data)
     {
         parent::unserialize($data);
@@ -191,11 +263,25 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         self::__construct($this->stopwatch, $fileLinkFormat, $charset);
     }
 
+    /**
+     * Gets dumps count.
+     *
+     * @return int
+     */
     public function getDumpsCount()
     {
         return $this->dataCount;
     }
 
+    /**
+     * Gets dumps.
+     *
+     * @param string $format
+     * @param int    $maxDepthLimit
+     * @param int    $maxItemsPerDepth
+     *
+     * @return array
+     */
     public function getDumps($format, $maxDepthLimit = -1, $maxItemsPerDepth = -1)
     {
         $data = fopen('php://memory', 'r+b');
@@ -206,6 +292,7 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         } else {
             throw new \InvalidArgumentException(sprintf('Invalid dump format: %s', $format));
         }
+
         $dumps = array();
 
         foreach ($this->data as $dump) {
@@ -219,11 +306,17 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         return $dumps;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getName()
     {
         return 'dump';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function __destruct()
     {
         if (0 === $this->clonesCount-- && !$this->isCollected && $this->data) {
@@ -233,6 +326,7 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
             $h = headers_list();
             $i = count($h);
             array_unshift($h, 'Content-Type: '.ini_get('default_mimetype'));
+
             while (0 !== stripos($h[$i], 'Content-Type:')) {
                 --$i;
             }
@@ -254,6 +348,14 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         }
     }
 
+    /**
+     * Do dump.
+     *
+     * @param mixed  $data
+     * @param string $name
+     * @param string $file
+     * @param int    $line
+     */
     private function doDump($data, $name, $file, $line)
     {
         if ($this->dumper instanceof CliDumper) {
@@ -283,9 +385,17 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
             $cloner = new VarCloner();
             $this->dumper->dump($cloner->cloneVar($name.' on line '.$line.':'));
         }
+
         $this->dumper->dump($data);
     }
 
+    /**
+     * Html encode.
+     *
+     * @param string $s
+     *
+     * @return string
+     */
     private function htmlEncode($s)
     {
         $html = '';

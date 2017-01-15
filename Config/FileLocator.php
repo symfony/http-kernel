@@ -21,7 +21,14 @@ use Symfony\Component\HttpKernel\KernelInterface;
  */
 class FileLocator extends BaseFileLocator
 {
+    /**
+     * @var KernelInterface
+     */
     private $kernel;
+
+    /**
+     * @var string|null
+     */
     private $path;
 
     /**
@@ -34,6 +41,7 @@ class FileLocator extends BaseFileLocator
     public function __construct(KernelInterface $kernel, $path = null, array $paths = array())
     {
         $this->kernel = $kernel;
+
         if (null !== $path) {
             $this->path = $path;
             $paths[] = $path;

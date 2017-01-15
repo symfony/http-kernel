@@ -21,8 +21,19 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class TraceableControllerResolver implements ControllerResolverInterface, ArgumentResolverInterface
 {
+    /**
+     * @var ControllerResolverInterface
+     */
     private $resolver;
+
+    /**
+     * @var Stopwatch
+     */
     private $stopwatch;
+
+    /**
+     * @var TraceableArgumentResolver
+     */
     private $argumentResolver;
 
     /**

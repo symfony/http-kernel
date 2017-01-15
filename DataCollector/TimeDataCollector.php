@@ -22,9 +22,22 @@ use Symfony\Component\HttpKernel\KernelInterface;
  */
 class TimeDataCollector extends DataCollector implements LateDataCollectorInterface
 {
+    /**
+     * @var KernelInterface
+     */
     protected $kernel;
+
+    /**
+     * @var Stopwatch|null
+     */
     protected $stopwatch;
 
+    /**
+     * Constructor.
+     *
+     * @param KernelInterface|null $kernel
+     * @param null                 $stopwatch
+     */
     public function __construct(KernelInterface $kernel = null, $stopwatch = null)
     {
         $this->kernel = $kernel;
