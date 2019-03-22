@@ -83,12 +83,23 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
     const END_OF_MAINTENANCE = '01/2020';
     const END_OF_LIFE = '07/2020';
 
-    public function __construct(string $environment, bool $debug)
+    public function __construct(string $environment, bool $debug, string $projectDir = null)
     {
         $this->environment = $environment;
         $this->debug = $debug;
         $this->rootDir = $this->getRootDir(false);
         $this->name = $this->getName(false);
+        if (null !== $projectDir && !is_dir($projectDir)) {
+            $backtrace = debug_backtrace();
+            $caller = array_shift($backtrace);
+            throw new \InvalidArgumentException(sprintf(
+                'Directory "%s" is not a directory, so it can not be used at project directory. Update the path in %s (line %d)',
+                $projectDir,
+                $caller['file'],
+                $caller['line']
+            ));
+        }
+        $this->projectDir = $projectDir;
     }
 
     public function __clone()
