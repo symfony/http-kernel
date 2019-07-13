@@ -317,6 +317,16 @@ EOF;
         $this->assertEquals($expected, serialize($kernel));
     }
 
+	/**
+     * Test locateResource when name is empty.
+	 *
+     * @expectedException \InvalidArgumentException
+     */
+    public function testLocateResourceWhenNameIsEmpty()
+    {
+        $this->getKernel()->locateResource('');
+    }
+	
     /**
      * @expectedException \InvalidArgumentException
      */
