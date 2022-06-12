@@ -133,7 +133,8 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                     $payload = $payloadMapper($request, $argument->metadata, $argument);
                 } catch (PartialDenormalizationException $e) {
                     $trans = $this->translator ? $this->translator->trans(...) : static fn ($m, $p) => strtr($m, $p);
-                    foreach ($e->getErrors() as $error) {
+                    $errors = method_exists($e, 'getNotNormalizableValueErrors') ? $e->getNotNormalizableValueErrors() : $e->getErrors();
+                    foreach ($errors as $error) {
                         $parameters = [];
                         $template = 'This value was of an unexpected type.';
                         if ($expectedTypes = $error->getExpectedTypes()) {
@@ -173,7 +174,8 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                 try {
                     $payload = $payloadMapper($request, $argument->metadata, $argument);
                 } catch (PartialDenormalizationException $e) {
-                    throw HttpException::fromStatusCode($validationFailedCode, implode("\n", array_map(static fn ($e) => $e->getMessage(), $e->getErrors())), $e);
+                    $errors = method_exists($e, 'getNotNormalizableValueErrors') ? $e->getNotNormalizableValueErrors() : $e->getErrors();
+                    throw HttpException::fromStatusCode($validationFailedCode, implode("\n", array_map(static fn ($e) => $e->getMessage(), $errors)), $e);
                 } catch (SerializerInvalidArgumentException $e) {
                     throw HttpException::fromStatusCode($validationFailedCode, $e->getMessage(), $e);
                 }
