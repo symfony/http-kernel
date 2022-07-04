@@ -42,10 +42,10 @@ class UriSigner
     public function sign(string $uri): string
     {
         $url = parse_url($uri);
+        $params = [];
+        
         if (isset($url['query'])) {
             parse_str($url['query'], $params);
-        } else {
-            $params = [];
         }
 
         $uri = $this->buildUrl($url, $params);
@@ -60,10 +60,10 @@ class UriSigner
     public function check(string $uri): bool
     {
         $url = parse_url($uri);
+        $params = [];
+        
         if (isset($url['query'])) {
             parse_str($url['query'], $params);
-        } else {
-            $params = [];
         }
 
         if (empty($params[$this->parameter])) {
