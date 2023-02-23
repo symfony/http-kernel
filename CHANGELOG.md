@@ -22,6 +22,7 @@ CHANGELOG
  * Allow using Expression or \Closure for `validationGroups` in `#[MapRequestPayload]` and `#[MapQueryString]`
  * Deprecate passing a `ControllerArgumentsEvent` to the `ViewEvent` constructor; pass a `ControllerArgumentsMetadata` instead
  * Support variadic argument with `#[MapRequestPayload]`
+ * Add `#[Serialize]` to serialize values returned by controllers
 
 8.0
 ---
