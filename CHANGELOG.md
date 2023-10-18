@@ -23,6 +23,7 @@ CHANGELOG
  * Deprecate passing a `ControllerArgumentsEvent` to the `ViewEvent` constructor; pass a `ControllerArgumentsMetadata` instead
  * Support variadic argument with `#[MapRequestPayload]`
  * Add `#[Serialize]` to serialize values returned by controllers
+ * Add argument `$mapWhenEmpty` to `MapQueryString` and `MapRequestPayload` for always attempting denormalization with empty query and request payload
 
 8.0
 ---
