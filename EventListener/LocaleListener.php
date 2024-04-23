@@ -41,7 +41,7 @@ class LocaleListener implements EventSubscriberInterface
         $this->requestStack = $requestStack;
         $this->router = $router;
         $this->useAcceptLanguageHeader = $useAcceptLanguageHeader;
-        $this->enabledLocales = $enabledLocales;
+        $this->enabledLocales = $enabledLocales ? array_values(array_unique(array_merge([$defaultLocale], $enabledLocales))) : [];
     }
 
     public function setDefaultLocale(KernelEvent $event): void

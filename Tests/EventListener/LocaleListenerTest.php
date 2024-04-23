@@ -192,6 +192,20 @@ class LocaleListenerTest extends TestCase
         $this->assertEquals('de', $request->getLocale());
     }
 
+    public function testDefaultLocaleReturnedWhenNoAcceptLanguageMatchAndDefaultLocaleIsNotFirstEnabledLocale()
+    {
+        $request = Request::create('/');
+        $request->headers->set('Accept-Language', 'es;q=0.9,ja;q=0.8');
+
+        // 'de' is the default locale but is NOT first in enabled_locales
+        $listener = new LocaleListener($this->requestStack, 'de', null, true, ['it', 'fr', 'de']);
+        $event = $this->getEvent($request);
+
+        $listener->setDefaultLocale($event);
+        $listener->onKernelRequest($event);
+        $this->assertEquals('de', $request->getLocale());
+    }
+
     public function testRequestNoLocaleFromAcceptLanguageHeader()
     {
         $request = Request::create('/');
