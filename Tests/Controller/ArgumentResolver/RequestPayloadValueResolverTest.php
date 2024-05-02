@@ -592,7 +592,7 @@ class RequestPayloadValueResolverTest extends TestCase
         $resolver = new RequestPayloadValueResolver($serializer, $validator);
 
         $argument = new ArgumentMetadata('variadic', RequestPayload::class, true, false, null, false, [
-            MapRequestPayload::class => new MapRequestPayload(),
+            MapQueryString::class => new MapQueryString(),
         ]);
         $request = Request::create('/', 'POST');
 
@@ -976,6 +976,70 @@ class RequestPayloadValueResolverTest extends TestCase
 
         $this->assertInstanceOf(QueryPayload::class, $event->getArguments()[0]);
         $this->assertSame(1.0, $event->getArguments()[0]->page);
+    }
+
+    public function testMapRequestPayloadVariadic()
+    {
+        $input = [
+            ['price' => '50'],
+            ['price' => '23'],
+        ];
+        $payload = [
+            new RequestPayload(50),
+            new RequestPayload(23),
+        ];
+
+        $serializer = new Serializer([new ArrayDenormalizer(), new ObjectNormalizer()], ['json' => new JsonEncoder()]);
+
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->once())
+            ->method('validate')
+            ->willReturn(new ConstraintViolationList());
+
+        $resolver = new RequestPayloadValueResolver($serializer, $validator);
+
+        $argument = new ArgumentMetadata('prices', RequestPayload::class, true, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(),
+        ]);
+        $request = Request::create('/', 'POST', $input);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        $arguments = $resolver->resolve($request, $argument);
+        $event = new ControllerArgumentsEvent($kernel, static function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+
+        $this->assertEquals($payload, $event->getArguments());
+    }
+
+    public function testMapRequestPayloadVariadicJson()
+    {
+        $payload = [
+            new RequestPayload(50),
+            new RequestPayload(23),
+        ];
+
+        $serializer = new Serializer([new ArrayDenormalizer(), new ObjectNormalizer()], ['json' => new JsonEncoder()]);
+
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->once())
+            ->method('validate')
+            ->willReturn(new ConstraintViolationList());
+
+        $resolver = new RequestPayloadValueResolver($serializer, $validator);
+
+        $argument = new ArgumentMetadata('prices', RequestPayload::class, true, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(),
+        ]);
+        $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: '[{"price": 50}, {"price": 23}]');
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        $arguments = $resolver->resolve($request, $argument);
+        $event = new ControllerArgumentsEvent($kernel, static function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+
+        $this->assertEquals($payload, $event->getArguments());
     }
 
     public function testMapRequestPayloadWithUploadedFiles()

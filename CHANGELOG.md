@@ -21,6 +21,7 @@ CHANGELOG
  * Deprecate the `Symfony\Component\HttpKernel\DependencyInjection\Extension` class, use the parent `Symfony\Component\DependencyInjection\Extension\Extension` class instead
  * Allow using Expression or \Closure for `validationGroups` in `#[MapRequestPayload]` and `#[MapQueryString]`
  * Deprecate passing a `ControllerArgumentsEvent` to the `ViewEvent` constructor; pass a `ControllerArgumentsMetadata` instead
+ * Support variadic argument with `#[MapRequestPayload]`
 
 8.0
 ---

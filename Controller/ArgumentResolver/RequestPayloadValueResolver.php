@@ -84,7 +84,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
             return [];
         }
 
-        if (!$attribute instanceof MapUploadedFile && $argument->isVariadic()) {
+        if ($attribute instanceof MapQueryString && $argument->isVariadic()) {
             throw new \LogicException(\sprintf('Mapping variadic argument "$%s" is not supported.', $argument->getName()));
         }
 
@@ -93,7 +93,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                 if (!$attribute->type) {
                     throw new NearMissValueResolverException(\sprintf('Please set the $type argument of the #[%s] attribute to the type of the objects in the expected array.', MapRequestPayload::class));
                 }
-            } elseif ($attribute->type) {
+            } elseif ($attribute->type && !$argument->isVariadic()) {
                 throw new NearMissValueResolverException(\sprintf('Please set its type to "array" when using argument $type of #[%s].', MapRequestPayload::class));
             }
         }
@@ -176,7 +176,11 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                 };
             }
 
-            $arguments[$i] = $payload;
+            if ($argument->metadata->isVariadic()) {
+                array_splice($arguments, $i, 1, $payload);
+            } else {
+                $arguments[$i] = $payload;
+            }
         }
 
         $event->setArguments($arguments);
@@ -212,11 +216,11 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
             throw new UnsupportedMediaTypeHttpException(\sprintf('Unsupported format, expects "%s", but "%s" given.', implode('", "', (array) $attribute->acceptFormat), $format));
         }
 
-        if ('array' === $argument->getType() && null !== $attribute->type) {
-            $type = $attribute->type.'[]';
-        } else {
-            $type = $argument->getType();
-        }
+        $type = match (true) {
+            $argument->isVariadic() => ($attribute->type ?? $argument->getType()).'[]',
+            'array' === $argument->getType() && null !== $attribute->type => $attribute->type.'[]',
+            default => $argument->getType(),
+        };
 
         if (\is_array($data)) {
             $data = $this->mergeParamsAndFiles($data, $request->files->all());
