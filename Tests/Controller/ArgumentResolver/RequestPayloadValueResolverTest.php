@@ -14,6 +14,8 @@ namespace Symfony\Component\HttpKernel\Tests\Controller\ArgumentResolver;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
@@ -22,9 +24,11 @@ use Symfony\Component\HttpKernel\Attribute\ValueResolver;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver\RequestPayloadValueResolver;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NearMissValueResolverException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\Tests\Fixtures\Controller\BasicTypesController;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
@@ -1003,6 +1007,161 @@ class RequestPayloadValueResolverTest extends TestCase
         $resolver->onKernelControllerArguments($event);
 
         $this->assertEquals([$payload], $event->getArguments());
+    }
+
+    public function testExpressionAsValidationGroup()
+    {
+        $content = '{"price": 24}';
+
+        $serializer = new Serializer([new ObjectNormalizer()], ['json' => new JsonEncoder()]);
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->once())
+            ->method('validate')
+            ->with(new RequestPayload(24.0), null, 'foo');
+
+        $resolver = new RequestPayloadValueResolver($serializer, $validator, expressionLanguage: new ExpressionLanguage());
+
+        $argument = new ArgumentMetadata('payload', RequestPayload::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(validationGroups: new Expression('args["foo"]')),
+        ]);
+
+        $request = Request::create('/{foo}/{bar}/{baz}', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
+
+        $arguments = (array) $resolver->resolve($request, $argument);
+        array_unshift($arguments, 'foo', 15, 1.23);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+
+        $controllerEvent = new ControllerEvent($kernel, [new BasicTypesController(), 'action'], $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $event = new ControllerArgumentsEvent($kernel, $controllerEvent, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+    }
+
+    public function testExpressionAsValidationGroupCanUseController()
+    {
+        $content = '{"price": 24}';
+
+        $serializer = new Serializer([new ObjectNormalizer()], ['json' => new JsonEncoder()]);
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->once())
+            ->method('validate')
+            ->with(new RequestPayload(24.0), null, 'foo');
+
+        $resolver = new RequestPayloadValueResolver($serializer, $validator, expressionLanguage: new ExpressionLanguage());
+
+        $argument = new ArgumentMetadata('payload', RequestPayload::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(validationGroups: new Expression('this ? args["foo"] : "bar"')),
+        ]);
+
+        $request = Request::create('/{foo}/{bar}/{baz}', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
+
+        $arguments = (array) $resolver->resolve($request, $argument);
+        array_unshift($arguments, 'foo', 15, 1.23);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+
+        $controllerEvent = new ControllerEvent($kernel, [new BasicTypesController(), 'action'], $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $event = new ControllerArgumentsEvent($kernel, $controllerEvent, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+    }
+
+    public function testClosureAsValidationGroup()
+    {
+        $content = '{"price": 24}';
+
+        $serializer = new Serializer([new ObjectNormalizer()], ['json' => new JsonEncoder()]);
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->once())
+            ->method('validate')
+            ->with(new RequestPayload(24.0), null, 'foo');
+
+        $resolver = new RequestPayloadValueResolver($serializer, $validator, expressionLanguage: new ExpressionLanguage());
+
+        $asserted = false;
+        $self = $this;
+
+        $argument = new ArgumentMetadata('payload', RequestPayload::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(validationGroups: static function (array $args, Request $request, ?object $controller) use (&$asserted, $self): string {
+                $self->assertInstanceOf(BasicTypesController::class, $controller);
+                $asserted = true;
+
+                return $args['foo'];
+            }),
+        ]);
+
+        $request = Request::create('/{foo}/{bar}/{baz}', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
+
+        $arguments = (array) $resolver->resolve($request, $argument);
+        array_unshift($arguments, 'foo', 15, 1.23);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+
+        $controllerEvent = new ControllerEvent($kernel, [new BasicTypesController(), 'action'], $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $event = new ControllerArgumentsEvent($kernel, $controllerEvent, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+
+        $this->assertTrue($asserted);
+    }
+
+    public function testExpressionAsValidationGroupForQueryString()
+    {
+        $serializer = new Serializer([new ObjectNormalizer()]);
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->once())
+            ->method('validate')
+            ->with(new QueryPayload(1.0), null, 'foo')
+            ->willReturn(new ConstraintViolationList());
+
+        $resolver = new RequestPayloadValueResolver($serializer, $validator, expressionLanguage: new ExpressionLanguage());
+
+        $argument = new ArgumentMetadata('payload', QueryPayload::class, false, false, null, false, [
+            MapQueryString::class => new MapQueryString(validationGroups: new Expression('args["foo"]')),
+        ]);
+
+        $request = Request::create('/', 'GET', ['page' => 1.0]);
+
+        $arguments = (array) $resolver->resolve($request, $argument);
+        array_unshift($arguments, 'foo', 15, 1.23);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        $controllerEvent = new ControllerEvent($kernel, [new BasicTypesController(), 'action'], $request, HttpKernelInterface::MAIN_REQUEST);
+        $event = new ControllerArgumentsEvent($kernel, $controllerEvent, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+    }
+
+    public function testNestedExpressionsInValidationGroupsAreNotSupported()
+    {
+        $content = '{"price": 24}';
+
+        $serializer = new Serializer([new ObjectNormalizer()], ['json' => new JsonEncoder()]);
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->never())
+            ->method('validate');
+
+        $resolver = new RequestPayloadValueResolver($serializer, $validator, expressionLanguage: new ExpressionLanguage());
+
+        $argument = new ArgumentMetadata('payload', RequestPayload::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(validationGroups: ['foo', new Expression('args["foo"]')]),
+        ]);
+
+        $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
+        $arguments = (array) $resolver->resolve($request, $argument);
+        array_unshift($arguments, 'foo', 15, 1.23);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        $controllerEvent = new ControllerEvent($kernel, [new BasicTypesController(), 'action'], $request, HttpKernelInterface::MAIN_REQUEST);
+        $event = new ControllerArgumentsEvent($kernel, $controllerEvent, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $this->expectException(\LogicException::class);
+
+        $resolver->onKernelControllerArguments($event);
     }
 }
 
