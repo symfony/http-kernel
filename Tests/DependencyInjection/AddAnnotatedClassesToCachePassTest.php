@@ -11,12 +11,13 @@
 
 namespace Symfony\Component\HttpKernel\Tests\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpKernel\DependencyInjection\AddAnnotatedClassesToCachePass;
 
-/**
- * @group legacy
- */
+#[IgnoreDeprecations]
+#[Group('legacy')]
 class AddAnnotatedClassesToCachePassTest extends TestCase
 {
     public function testExpandClasses()

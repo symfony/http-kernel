@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\HttpKernel\Tests\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Argument\LazyClosure;
 use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
@@ -519,9 +521,8 @@ class RegisterControllerArgumentLocatorsPassTest extends TestCase
         $this->assertFalse($locator->has('service2'));
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testTaggedIteratorAndTaggedLocatorAttributes()
     {
         $container = new ContainerBuilder();
