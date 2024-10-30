@@ -22,6 +22,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Tests\Fixtures\Suit;
+use Symfony\Component\Uid\Ulid;
 
 class QueryParameterValueResolverTest extends TestCase
 {
@@ -44,7 +45,7 @@ class QueryParameterValueResolverTest extends TestCase
      */
     public function testResolvingSuccessfully(Request $request, ArgumentMetadata $metadata, array $expected)
     {
-        $this->assertSame($expected, $this->resolver->resolve($request, $metadata));
+        $this->assertEquals($expected, $this->resolver->resolve($request, $metadata));
     }
 
     /**
@@ -231,6 +232,12 @@ class QueryParameterValueResolverTest extends TestCase
             new ArgumentMetadata('firstName', 'string', false, true, false, attributes: [new MapQueryParameter()]),
             [],
         ];
+
+        yield 'parameter found and ULID' => [
+            Request::create('/', 'GET', ['groupId' => '01E439TP9XJZ9RPFH3T1PYBCR8']),
+            new ArgumentMetadata('groupId', Ulid::class, false, true, false, attributes: [new MapQueryParameter()]),
+            [Ulid::fromString('01E439TP9XJZ9RPFH3T1PYBCR8')],
+        ];
     }
 
     /**
@@ -245,13 +252,13 @@ class QueryParameterValueResolverTest extends TestCase
         yield 'unsupported type' => [
             Request::create('/', 'GET', ['standardClass' => 'test']),
             new ArgumentMetadata('standardClass', \stdClass::class, false, false, false, attributes: [new MapQueryParameter()]),
-            '#[MapQueryParameter] cannot be used on controller argument "$standardClass" of type "stdClass"; one of array, string, int, float, bool or \BackedEnum should be used.',
+            '#[MapQueryParameter] cannot be used on controller argument "$standardClass" of type "stdClass"; one of array, string, int, float, bool, uid or \BackedEnum should be used.',
         ];
 
         yield 'unsupported type variadic' => [
             Request::create('/', 'GET', ['standardClass' => 'test']),
             new ArgumentMetadata('standardClass', \stdClass::class, true, false, false, attributes: [new MapQueryParameter()]),
-            '#[MapQueryParameter] cannot be used on controller argument "...$standardClass" of type "stdClass"; one of array, string, int, float, bool or \BackedEnum should be used.',
+            '#[MapQueryParameter] cannot be used on controller argument "...$standardClass" of type "stdClass"; one of array, string, int, float, bool, uid or \BackedEnum should be used.',
         ];
     }
 
