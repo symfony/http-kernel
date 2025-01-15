@@ -108,50 +108,50 @@ class QueryParameterValueResolverTest extends TestCase
 
         yield 'parameter found and string with regexp filter that matches' => [
             Request::create('/', 'GET', ['firstName' => 'John']),
-            new ArgumentMetadata('firstName', 'string', false, false, false, attributes: [new MapQueryParameter(filter: \FILTER_VALIDATE_REGEXP, flags: \FILTER_NULL_ON_FAILURE, options: ['regexp' => '/John/'])]),
+            new ArgumentMetadata('firstName', 'string', false, false, false, attributes: [new MapQueryParameter(options: ['regexp' => '/John/'])]),
             ['John'],
         ];
 
         yield 'parameter found and string with regexp filter that falls back to null on failure' => [
             Request::create('/', 'GET', ['firstName' => 'Fabien']),
-            new ArgumentMetadata('firstName', 'string', false, false, false, attributes: [new MapQueryParameter(filter: \FILTER_VALIDATE_REGEXP, flags: \FILTER_NULL_ON_FAILURE, options: ['regexp' => '/John/'])]),
+            new ArgumentMetadata('firstName', 'string', false, false, false, attributes: [new MapQueryParameter(flags: \FILTER_NULL_ON_FAILURE, options: ['regexp' => '/John/'])]),
             [null],
         ];
 
         yield 'parameter found and string variadic with regexp filter that matches' => [
             Request::create('/', 'GET', ['firstName' => ['John', 'John']]),
-            new ArgumentMetadata('firstName', 'string', true, false, false, attributes: [new MapQueryParameter(filter: \FILTER_VALIDATE_REGEXP, flags: \FILTER_NULL_ON_FAILURE, options: ['regexp' => '/John/'])]),
+            new ArgumentMetadata('firstName', 'string', true, false, false, attributes: [new MapQueryParameter(options: ['regexp' => '/John/'])]),
             ['John', 'John'],
         ];
 
         yield 'parameter found and string variadic with regexp filter that falls back to null on failure' => [
             Request::create('/', 'GET', ['firstName' => ['John', 'Fabien']]),
-            new ArgumentMetadata('firstName', 'string', true, false, false, attributes: [new MapQueryParameter(filter: \FILTER_VALIDATE_REGEXP, flags: \FILTER_NULL_ON_FAILURE, options: ['regexp' => '/John/'])]),
+            new ArgumentMetadata('firstName', 'string', true, false, false, attributes: [new MapQueryParameter(flags: \FILTER_NULL_ON_FAILURE, options: ['regexp' => '/John/'])]),
             ['John'],
         ];
 
         yield 'parameter found and integer' => [
-            Request::create('/', 'GET', ['age' => 123]),
+            Request::create('/', 'GET', ['age' => '123']),
             new ArgumentMetadata('age', 'int', false, false, false, attributes: [new MapQueryParameter()]),
             [123],
         ];
 
         yield 'parameter found and integer variadic' => [
-            Request::create('/', 'GET', ['age' => [123, 222]]),
+            Request::create('/', 'GET', ['age' => ['123', '222']]),
             new ArgumentMetadata('age', 'int', true, false, false, attributes: [new MapQueryParameter()]),
             [123, 222],
         ];
 
         yield 'parameter found and float' => [
-            Request::create('/', 'GET', ['price' => 10.99]),
+            Request::create('/', 'GET', ['price' => '10.99']),
             new ArgumentMetadata('price', 'float', false, false, false, attributes: [new MapQueryParameter()]),
             [10.99],
         ];
 
         yield 'parameter found and float variadic' => [
-            Request::create('/', 'GET', ['price' => [10.99, 5.99]]),
+            Request::create('/', 'GET', ['price' => ['10.99e2', '5.99']]),
             new ArgumentMetadata('price', 'float', true, false, false, attributes: [new MapQueryParameter()]),
-            [10.99, 5.99],
+            [1099.0, 5.99],
         ];
 
         yield 'parameter found and boolean yes' => [
@@ -209,7 +209,7 @@ class QueryParameterValueResolverTest extends TestCase
         ];
 
         yield 'parameter found and backing type variadic and at least one backing value not int nor string that fallbacks to null on failure' => [
-            Request::create('/', 'GET', ['suits' => [1, 'D']]),
+            Request::create('/', 'GET', ['suits' => ['1', 'D']]),
             new ArgumentMetadata('suits', Suit::class, false, false, false, attributes: [new MapQueryParameter(flags: \FILTER_NULL_ON_FAILURE)]),
             [null],
         ];
@@ -265,7 +265,7 @@ class QueryParameterValueResolverTest extends TestCase
     public static function invalidOrMissingArgumentProvider(): iterable
     {
         yield 'parameter found and array variadic with parameter not array failure' => [
-            Request::create('/', 'GET', ['ids' => [['1', '2'], 1]]),
+            Request::create('/', 'GET', ['ids' => [['1', '2'], '1']]),
             new ArgumentMetadata('ids', 'array', true, false, false, attributes: [new MapQueryParameter()]),
             new NotFoundHttpException('Invalid query parameter "ids".'),
         ];

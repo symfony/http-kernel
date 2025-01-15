@@ -76,7 +76,7 @@ final class QueryParameterValueResolver implements ValueResolverInterface
         $enumType = null;
         $filter = match ($type) {
             'array' => \FILTER_DEFAULT,
-            'string' => \FILTER_DEFAULT,
+            'string' => isset($attribute->options['regexp']) ? \FILTER_VALIDATE_REGEXP : \FILTER_DEFAULT,
             'int' => \FILTER_VALIDATE_INT,
             'float' => \FILTER_VALIDATE_FLOAT,
             'bool' => \FILTER_VALIDATE_BOOL,
