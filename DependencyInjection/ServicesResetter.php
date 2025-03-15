@@ -46,6 +46,10 @@ class ServicesResetter implements ResetInterface
                 continue;
             }
 
+            if (\PHP_VERSION_ID >= 80400 && (new \ReflectionClass($service))->isUninitializedLazyObject($service)) {
+                continue;
+            }
+
             foreach ((array) $this->resetMethods[$id] as $resetMethod) {
                 if ('?' === $resetMethod[0] && !method_exists($service, $resetMethod = substr($resetMethod, 1))) {
                     continue;
