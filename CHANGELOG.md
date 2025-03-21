@@ -6,6 +6,7 @@ CHANGELOG
 
  * Add `$key` argument to `#[MapQueryString]` that allows using a specific key for argument resolving
  * Support `Uid` in `#[MapQueryParameter]`
+ * Add `ServicesResetterInterface`, implemented by `ServicesResetter`
 
 7.2
 ---
