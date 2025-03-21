@@ -13,7 +13,6 @@ namespace Symfony\Component\HttpKernel\DependencyInjection;
 
 use ProxyManager\Proxy\LazyLoadingInterface;
 use Symfony\Component\VarExporter\LazyObjectInterface;
-use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * Resets provided services.
@@ -23,7 +22,7 @@ use Symfony\Contracts\Service\ResetInterface;
  *
  * @final since Symfony 7.2
  */
-class ServicesResetter implements ResetInterface
+class ServicesResetter implements ServicesResetterInterface
 {
     /**
      * @param \Traversable<string, object>   $resettableServices
