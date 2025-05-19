@@ -307,6 +307,66 @@ class UploadedFileValueResolverTest extends TestCase
         $resolver->onKernelControllerArguments($event);
     }
 
+    /**
+     * @dataProvider provideContext
+     */
+    public function testShouldAllowEmptyWhenNullable(RequestPayloadValueResolver $resolver, Request $request)
+    {
+        $attribute = new MapUploadedFile();
+        $argument = new ArgumentMetadata(
+            'qux',
+            UploadedFile::class,
+            false,
+            false,
+            null,
+            true,
+            [$attribute::class => $attribute]
+        );
+        /** @var HttpKernelInterface&MockObject $httpKernel */
+        $httpKernel = $this->createMock(HttpKernelInterface::class);
+        $event = new ControllerArgumentsEvent(
+            $httpKernel,
+            static function () {},
+            $resolver->resolve($request, $argument),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+        $resolver->onKernelControllerArguments($event);
+        $data = $event->getArguments()[0];
+
+        $this->assertNull($data);
+    }
+
+    /**
+     * @dataProvider provideContext
+     */
+    public function testShouldAllowEmptyWhenHasDefaultValue(RequestPayloadValueResolver $resolver, Request $request)
+    {
+        $attribute = new MapUploadedFile();
+        $argument = new ArgumentMetadata(
+            'qux',
+            UploadedFile::class,
+            false,
+            true,
+            'default-value',
+            false,
+            [$attribute::class => $attribute]
+        );
+        /** @var HttpKernelInterface&MockObject $httpKernel */
+        $httpKernel = $this->createMock(HttpKernelInterface::class);
+        $event = new ControllerArgumentsEvent(
+            $httpKernel,
+            static function () {},
+            $resolver->resolve($request, $argument),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+        $resolver->onKernelControllerArguments($event);
+        $data = $event->getArguments()[0];
+
+        $this->assertSame('default-value', $data);
+    }
+
     public static function provideContext(): iterable
     {
         $resolver = new RequestPayloadValueResolver(
