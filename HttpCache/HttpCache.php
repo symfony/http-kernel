@@ -558,6 +558,8 @@ class HttpCache implements HttpKernelInterface, TerminableInterface
             return true;
         }
 
+        $this->record($request, 'waiting');
+
         // wait for the lock to be released
         if ($this->waitForLock($request)) {
             // replace the current entry with the fresh one
