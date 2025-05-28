@@ -102,18 +102,18 @@ class CacheAttributeListenerTest extends TestCase
         $this->assertFalse($this->response->headers->hasCacheControlDirective('no-store'));
     }
 
-    public function testResponseIsPrivateIfConfigurationIsPublicTrueNoStoreTrue()
+    public function testResponseKeepPublicIfConfigurationIsPublicTrueNoStoreTrue()
     {
         $request = $this->createRequest(new Cache(public: true, noStore: true));
 
         $this->listener->onKernelResponse($this->createEventMock($request, $this->response));
 
-        $this->assertFalse($this->response->headers->hasCacheControlDirective('public'));
-        $this->assertTrue($this->response->headers->hasCacheControlDirective('private'));
+        $this->assertTrue($this->response->headers->hasCacheControlDirective('public'));
+        $this->assertFalse($this->response->headers->hasCacheControlDirective('private'));
         $this->assertTrue($this->response->headers->hasCacheControlDirective('no-store'));
     }
 
-    public function testResponseIsPrivateNoStoreIfConfigurationIsNoStoreTrue()
+    public function testResponseKeepPrivateNoStoreIfConfigurationIsNoStoreTrue()
     {
         $request = $this->createRequest(new Cache(noStore: true));
 
@@ -124,14 +124,14 @@ class CacheAttributeListenerTest extends TestCase
         $this->assertTrue($this->response->headers->hasCacheControlDirective('no-store'));
     }
 
-    public function testResponseIsPrivateIfSharedMaxAgeSetAndNoStoreIsTrue()
+    public function testResponseIsPublicIfSharedMaxAgeSetAndNoStoreIsTrue()
     {
         $request = $this->createRequest(new Cache(smaxage: 1, noStore: true));
 
         $this->listener->onKernelResponse($this->createEventMock($request, $this->response));
 
-        $this->assertFalse($this->response->headers->hasCacheControlDirective('public'));
-        $this->assertTrue($this->response->headers->hasCacheControlDirective('private'));
+        $this->assertTrue($this->response->headers->hasCacheControlDirective('public'));
+        $this->assertFalse($this->response->headers->hasCacheControlDirective('private'));
         $this->assertTrue($this->response->headers->hasCacheControlDirective('no-store'));
     }
 
