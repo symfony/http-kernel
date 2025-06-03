@@ -45,7 +45,7 @@ class ServicesResetter implements ServicesResetterInterface
                 continue;
             }
 
-            if (\PHP_VERSION_ID >= 80400 && (new \ReflectionClass($service))->isUninitializedLazyObject($service)) {
+            if (new \ReflectionClass($service)->isUninitializedLazyObject($service)) {
                 continue;
             }
 
