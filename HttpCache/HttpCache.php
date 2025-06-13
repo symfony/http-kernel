@@ -210,7 +210,13 @@ class HttpCache implements HttpKernelInterface, TerminableInterface
             $this->record($request, 'reload');
             $response = $this->fetch($request, $catch);
         } else {
-            $response = $this->lookup($request, $catch);
+            $response = null;
+            do {
+                try {
+                    $response = $this->lookup($request, $catch);
+                } catch (CacheWasLockedException) {
+                }
+            } while (null === $response);
         }
 
         $this->restoreResponseBody($request, $response);
@@ -560,15 +566,7 @@ class HttpCache implements HttpKernelInterface, TerminableInterface
 
         // wait for the lock to be released
         if ($this->waitForLock($request)) {
-            // replace the current entry with the fresh one
-            $new = $this->lookup($request);
-            $entry->headers = $new->headers;
-            $entry->setContent($new->getContent());
-            $entry->setStatusCode($new->getStatusCode());
-            $entry->setProtocolVersion($new->getProtocolVersion());
-            foreach ($new->headers->getCookies() as $cookie) {
-                $entry->headers->setCookie($cookie);
-            }
+            throw new CacheWasLockedException(); // unwind back to handle(), try again
         } else {
             // backend is slow as hell, send a 503 response (to avoid the dog pile effect)
             $entry->setStatusCode(503);
