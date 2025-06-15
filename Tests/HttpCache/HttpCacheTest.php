@@ -737,7 +737,7 @@ class HttpCacheTest extends HttpCacheTestCase
         $this->assertEquals('initial response', $this->response->getContent());
 
         $traces = $this->cache->getTraces();
-        $this->assertSame(['stale', 'valid', 'store'], current($traces));
+        $this->assertSame(['waiting', 'stale', 'valid', 'store'], current($traces));
     }
 
     public function testTraceAddedWhenCacheLocked()
