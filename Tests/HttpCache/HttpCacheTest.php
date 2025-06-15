@@ -682,6 +682,64 @@ class HttpCacheTest extends HttpCacheTestCase
         $this->assertEquals('Old response', $this->response->getContent());
     }
 
+    public function testHitBackendOnlyOnceWhenCacheWasLocked()
+    {
+        // Disable stale-while-revalidate, it circumvents waiting for the lock
+        $this->cacheConfig['stale_while_revalidate'] = 0;
+
+        $this->setNextResponses([
+            [
+                'status' => 200,
+                'body' => 'initial response',
+                'headers' => [
+                    'Cache-Control' => 'public, no-cache',
+                    'Last-Modified' => 'some while ago',
+                ],
+            ],
+            [
+                'status' => 304,
+                'body' => '',
+                'headers' => [
+                    'Cache-Control' => 'public, no-cache',
+                    'Last-Modified' => 'some while ago',
+                ],
+            ],
+            [
+                'status' => 500,
+                'body' => 'The backend should not be called twice during revalidation',
+                'headers' => [],
+            ],
+        ]);
+
+        $this->request('GET', '/'); // warm the cache
+
+        // Use a store that simulates a cache entry being locked upon first attempt
+        $this->store = new class(sys_get_temp_dir() . '/http_cache') extends Store {
+            private bool $hasLock = false;
+
+            public function lock(Request $request): bool
+            {
+                $hasLock = $this->hasLock;
+                $this->hasLock = true;
+
+                return $hasLock;
+            }
+
+            public function isLocked(Request $request): bool
+            {
+                return false;
+            }
+        };
+
+        $this->request('GET', '/'); // hit the cache with simulated lock/concurrency block
+
+        $this->assertEquals(200, $this->response->getStatusCode());
+        $this->assertEquals('initial response', $this->response->getContent());
+
+        $traces = $this->cache->getTraces();
+        $this->assertSame(['stale', 'valid', 'store'], current($traces));
+    }
+
     public function testTraceAddedWhenCacheLocked()
     {
         if ('\\' === \DIRECTORY_SEPARATOR) {
