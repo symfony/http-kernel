@@ -275,18 +275,6 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
         return $this->container;
     }
 
-    /**
-     * @internal
-     *
-     * @deprecated since Symfony 7.1, to be removed in 8.0
-     */
-    public function setAnnotatedClassCache(array $annotatedClasses): void
-    {
-        trigger_deprecation('symfony/http-kernel', '7.1', 'The "%s()" method is deprecated since Symfony 7.1 and will be removed in 8.0.', __METHOD__);
-
-        file_put_contents(($this->warmupDir ?: $this->getBuildDir()).'/annotations.map', \sprintf('<?php return %s;', var_export($annotatedClasses, true)));
-    }
-
     public function getStartTime(): float
     {
         return $this->debug && null !== $this->startTime ? $this->startTime : -\INF;
@@ -311,20 +299,6 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
     public function getCharset(): string
     {
         return 'UTF-8';
-    }
-
-    /**
-     * Gets the patterns defining the classes to parse and cache for annotations.
-     *
-     * @return string[]
-     *
-     * @deprecated since Symfony 7.1, to be removed in 8.0
-     */
-    public function getAnnotatedClassesToCompile(): array
-    {
-        trigger_deprecation('symfony/http-kernel', '7.1', 'The "%s()" method is deprecated since Symfony 7.1 and will be removed in 8.0.', __METHOD__);
-
-        return [];
     }
 
     /**

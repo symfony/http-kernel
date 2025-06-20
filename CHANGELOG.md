@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+8.0
+---
+
+* Remove `AddAnnotatedClassesToCachePass`
+* Remove `Extension::getAnnotatedClassesToCompile()` and `Extension::addAnnotatedClassesToCompile()`
+* Remove `Kernel::getAnnotatedClassesToCompile()` and `Kernel::setAnnotatedClassCache()`
+
 7.3
 ---
 
