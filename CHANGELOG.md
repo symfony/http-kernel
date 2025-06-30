@@ -7,6 +7,7 @@ CHANGELOG
 * Remove `AddAnnotatedClassesToCachePass`
 * Remove `Extension::getAnnotatedClassesToCompile()` and `Extension::addAnnotatedClassesToCompile()`
 * Remove `Kernel::getAnnotatedClassesToCompile()` and `Kernel::setAnnotatedClassCache()`
+* Make `ServicesResetter` class `final`
 
 7.3
 ---

@@ -19,10 +19,8 @@ use Symfony\Component\VarExporter\LazyObjectInterface;
  *
  * @author Alexander M. Turek <me@derrabus.de>
  * @author Nicolas Grekas <p@tchwork.com>
- *
- * @final since Symfony 7.2
  */
-class ServicesResetter implements ServicesResetterInterface
+final class ServicesResetter implements ServicesResetterInterface
 {
     /**
      * @param \Traversable<string, object>   $resettableServices
