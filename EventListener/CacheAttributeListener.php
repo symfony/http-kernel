@@ -182,6 +182,12 @@ class CacheAttributeListener implements EventSubscriberInterface
         ];
     }
 
+    public function reset(): void
+    {
+        $this->lastModified = new \SplObjectStorage();
+        $this->etags = new \SplObjectStorage();
+    }
+
     private function getExpressionLanguage(): ExpressionLanguage
     {
         return $this->expressionLanguage ??= class_exists(ExpressionLanguage::class)

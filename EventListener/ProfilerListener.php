@@ -129,8 +129,14 @@ class ProfilerListener implements EventSubscriberInterface
             $this->profiler->saveProfile($this->profiles[$request]);
         }
 
+        $this->reset();
+    }
+
+    public function reset(): void
+    {
         $this->profiles = new \SplObjectStorage();
         $this->parents = new \SplObjectStorage();
+        $this->exception = null;
     }
 
     public static function getSubscribedEvents(): array
