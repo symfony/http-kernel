@@ -354,7 +354,7 @@ class RouterListenerTest extends TestCase
                 '_route_mapping' => [
                     'id' => [
                         'article',
-                        'id'
+                        'id',
                     ],
                     'date' => [
                         'article',
