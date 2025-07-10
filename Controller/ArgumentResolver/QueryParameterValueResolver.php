@@ -38,7 +38,7 @@ final class QueryParameterValueResolver implements ValueResolverInterface
                 return [];
             }
 
-            throw new NotFoundHttpException(sprintf('Missing query parameter "%s".', $name));
+            throw new NotFoundHttpException(\sprintf('Missing query parameter "%s".', $name));
         }
 
         $value = $request->query->all()[$name];
@@ -52,7 +52,7 @@ final class QueryParameterValueResolver implements ValueResolverInterface
             $filtered = array_values(array_filter((array) $value, \is_array(...)));
 
             if ($filtered !== $value && !($attribute->flags & \FILTER_NULL_ON_FAILURE)) {
-                throw new NotFoundHttpException(sprintf('Invalid query parameter "%s".', $name));
+                throw new NotFoundHttpException(\sprintf('Invalid query parameter "%s".', $name));
             }
 
             return $filtered;
@@ -80,8 +80,8 @@ final class QueryParameterValueResolver implements ValueResolverInterface
             default => match ($enumType = is_subclass_of($type, \BackedEnum::class) ? (new \ReflectionEnum($type))->getBackingType()->getName() : null) {
                 'int' => \FILTER_VALIDATE_INT,
                 'string' => \FILTER_DEFAULT,
-                default => throw new \LogicException(sprintf('#[MapQueryParameter] cannot be used on controller argument "%s$%s" of type "%s"; one of array, string, int, float, bool or \BackedEnum should be used.', $argument->isVariadic() ? '...' : '', $argument->getName(), $type ?? 'mixed')),
-            }
+                default => throw new \LogicException(\sprintf('#[MapQueryParameter] cannot be used on controller argument "%s$%s" of type "%s"; one of array, string, int, float, bool or \BackedEnum should be used.', $argument->isVariadic() ? '...' : '', $argument->getName(), $type ?? 'mixed')),
+            },
         };
 
         $value = filter_var($value, $attribute->filter ?? $filter, $options);
@@ -103,7 +103,7 @@ final class QueryParameterValueResolver implements ValueResolverInterface
         }
 
         if (null === $value && !($attribute->flags & \FILTER_NULL_ON_FAILURE)) {
-            throw new NotFoundHttpException(sprintf('Invalid query parameter "%s".', $name));
+            throw new NotFoundHttpException(\sprintf('Invalid query parameter "%s".', $name));
         }
 
         if (!\is_array($value)) {
@@ -117,7 +117,7 @@ final class QueryParameterValueResolver implements ValueResolverInterface
         }
 
         if ($filtered !== $value && !($attribute->flags & \FILTER_NULL_ON_FAILURE)) {
-            throw new NotFoundHttpException(sprintf('Invalid query parameter "%s".', $name));
+            throw new NotFoundHttpException(\sprintf('Invalid query parameter "%s".', $name));
         }
 
         return $argument->isVariadic() ? $filtered : [$filtered];

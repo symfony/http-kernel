@@ -432,13 +432,13 @@ class ArgumentResolverTestController
     public function controllerTargetingManyResolvers(
         #[ValueResolver(RequestAttributeValueResolver::class)]
         #[ValueResolver(DefaultValueResolver::class)]
-        int $foo
+        int $foo,
     ) {
     }
 
     public function controllerTargetingUnknownResolver(
         #[ValueResolver('foo')]
-        int $bar
+        int $bar,
     ) {
     }
 }

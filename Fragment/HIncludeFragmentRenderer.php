@@ -79,7 +79,7 @@ class HIncludeFragmentRenderer extends RoutableFragmentRenderer
         if (\count($attributes) > 0) {
             $flags = \ENT_QUOTES | \ENT_SUBSTITUTE;
             foreach ($attributes as $attribute => $value) {
-                $renderedAttributes .= sprintf(
+                $renderedAttributes .= \sprintf(
                     ' %s="%s"',
                     htmlspecialchars($attribute, $flags, $this->charset, false),
                     htmlspecialchars($value, $flags, $this->charset, false)
@@ -87,7 +87,7 @@ class HIncludeFragmentRenderer extends RoutableFragmentRenderer
             }
         }
 
-        return new Response(sprintf('<hx:include src="%s"%s>%s</hx:include>', $uri, $renderedAttributes, $content));
+        return new Response(\sprintf('<hx:include src="%s"%s>%s</hx:include>', $uri, $renderedAttributes, $content));
     }
 
     public function getName(): string

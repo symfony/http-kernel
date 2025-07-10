@@ -78,7 +78,7 @@ class BackedEnumValueResolver implements ArgumentValueResolverInterface, ValueRe
         }
 
         if (!\is_int($value) && !\is_string($value)) {
-            throw new \LogicException(sprintf('Could not resolve the "%s $%s" controller argument: expecting an int or string, got "%s".', $argument->getType(), $argument->getName(), get_debug_type($value)));
+            throw new \LogicException(\sprintf('Could not resolve the "%s $%s" controller argument: expecting an int or string, got "%s".', $argument->getType(), $argument->getName(), get_debug_type($value)));
         }
 
         /** @var class-string<\BackedEnum> $enumType */
@@ -87,7 +87,7 @@ class BackedEnumValueResolver implements ArgumentValueResolverInterface, ValueRe
         try {
             return [$enumType::from($value)];
         } catch (\ValueError|\TypeError $e) {
-            throw new NotFoundHttpException(sprintf('Could not resolve the "%s $%s" controller argument: ', $argument->getType(), $argument->getName()).$e->getMessage(), $e);
+            throw new NotFoundHttpException(\sprintf('Could not resolve the "%s $%s" controller argument: ', $argument->getType(), $argument->getName()).$e->getMessage(), $e);
         }
     }
 }

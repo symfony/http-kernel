@@ -60,7 +60,7 @@ final class ArgumentResolver implements ArgumentResolverInterface
                     if ($attribute->disabled) {
                         $disabledResolvers[$attribute->resolver] = true;
                     } elseif ($resolverName) {
-                        throw new \LogicException(sprintf('You can only pin one resolver per argument, but argument "$%s" of "%s()" has more.', $metadata->getName(), $this->getPrettyName($controller)));
+                        throw new \LogicException(\sprintf('You can only pin one resolver per argument, but argument "$%s" of "%s()" has more.', $metadata->getName(), $this->getPrettyName($controller)));
                     } else {
                         $resolverName = $attribute->resolver;
                     }
@@ -94,7 +94,7 @@ final class ArgumentResolver implements ArgumentResolverInterface
                 }
 
                 if (1 < $count && !$metadata->isVariadic()) {
-                    throw new \InvalidArgumentException(sprintf('"%s::resolve()" must yield at most one value for non-variadic arguments.', get_debug_type($resolver)));
+                    throw new \InvalidArgumentException(\sprintf('"%s::resolve()" must yield at most one value for non-variadic arguments.', get_debug_type($resolver)));
                 }
 
                 if ($count) {
@@ -103,11 +103,11 @@ final class ArgumentResolver implements ArgumentResolverInterface
                 }
 
                 if (!$resolver instanceof ValueResolverInterface) {
-                    throw new \InvalidArgumentException(sprintf('"%s::resolve()" must yield at least one value.', get_debug_type($resolver)));
+                    throw new \InvalidArgumentException(\sprintf('"%s::resolve()" must yield at least one value.', get_debug_type($resolver)));
                 }
             }
 
-            throw new \RuntimeException(sprintf('Controller "%s" requires that you provide a value for the "$%s" argument. Either the argument is nullable and no null value has been provided, no default value has been provided or there is a non-optional argument after this one.', $this->getPrettyName($controller), $metadata->getName()));
+            throw new \RuntimeException(\sprintf('Controller "%s" requires that you provide a value for the "$%s" argument. Either the argument is nullable and no null value has been provided, no default value has been provided or there is a non-optional argument after this one.', $this->getPrettyName($controller), $metadata->getName()));
         }
 
         return $arguments;

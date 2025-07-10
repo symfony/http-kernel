@@ -173,7 +173,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $this->assertSame(422, $e->getStatusCode());
         }
@@ -198,7 +198,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $this->assertSame(404, $e->getStatusCode());
         }
@@ -222,7 +222,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $this->assertInstanceOf(PartialDenormalizationException::class, $e->getPrevious());
         }
@@ -250,12 +250,12 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $validationFailedException = $e->getPrevious();
             $this->assertSame(422, $e->getStatusCode());
             $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
-            $this->assertSame(sprintf('This value should be of type %s.', class_exists(InvalidTypeException::class) ? 'string' : 'unknown'), $validationFailedException->getViolations()[0]->getMessage());
+            $this->assertSame(\sprintf('This value should be of type %s.', class_exists(InvalidTypeException::class) ? 'string' : 'unknown'), $validationFailedException->getViolations()[0]->getMessage());
         }
     }
 
@@ -281,7 +281,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $validationFailedException = $e->getPrevious();
             $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
@@ -306,7 +306,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $this->assertSame(415, $e->getStatusCode());
         }
@@ -419,7 +419,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $validationFailedException = $e->getPrevious();
             $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
@@ -479,7 +479,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $validationFailedException = $e->getPrevious();
             $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
@@ -588,7 +588,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $this->assertSame(415, $e->getStatusCode());
             $this->assertSame($expectedExceptionMessage, $e->getMessage());
@@ -684,7 +684,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $validationFailedException = $e->getPrevious();
             $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
@@ -749,7 +749,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $validationFailedException = $e->getPrevious();
             $this->assertSame(400, $e->getStatusCode());
@@ -780,12 +780,12 @@ class RequestPayloadValueResolverTest extends TestCase
 
         try {
             $resolver->onKernelControllerArguments($event);
-            $this->fail(sprintf('Expected "%s" to be thrown.', HttpException::class));
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
         } catch (HttpException $e) {
             $validationFailedException = $e->getPrevious();
             $this->assertSame(400, $e->getStatusCode());
             $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
-            $this->assertSame(sprintf('This value should be of type %s.', class_exists(InvalidTypeException::class) ? 'string' : 'unknown'), $validationFailedException->getViolations()[0]->getMessage());
+            $this->assertSame(\sprintf('This value should be of type %s.', class_exists(InvalidTypeException::class) ? 'string' : 'unknown'), $validationFailedException->getViolations()[0]->getMessage());
         }
     }
 }

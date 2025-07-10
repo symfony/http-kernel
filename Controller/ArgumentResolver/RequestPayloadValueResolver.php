@@ -71,7 +71,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         if ($argument->isVariadic()) {
-            throw new \LogicException(sprintf('Mapping variadic argument "$%s" is not supported.', $argument->getName()));
+            throw new \LogicException(\sprintf('Mapping variadic argument "$%s" is not supported.', $argument->getName()));
         }
 
         $attribute->metadata = $argument;
@@ -96,7 +96,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
             $request = $event->getRequest();
 
             if (!$type = $argument->metadata->getType()) {
-                throw new \LogicException(sprintf('Could not resolve the "$%s" controller argument: argument should be typed.', $argument->metadata->getName()));
+                throw new \LogicException(\sprintf('Could not resolve the "$%s" controller argument: argument should be typed.', $argument->metadata->getName()));
             }
 
             if ($this->validator) {
@@ -140,7 +140,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                 $payload = match (true) {
                     $argument->metadata->hasDefaultValue() => $argument->metadata->getDefaultValue(),
                     $argument->metadata->isNullable() => null,
-                    default => throw new HttpException($validationFailedCode)
+                    default => throw new HttpException($validationFailedCode),
                 };
             }
 
@@ -173,7 +173,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         if ($attribute->acceptFormat && !\in_array($format, (array) $attribute->acceptFormat, true)) {
-            throw new HttpException(Response::HTTP_UNSUPPORTED_MEDIA_TYPE, sprintf('Unsupported format, expects "%s", but "%s" given.', implode('", "', (array) $attribute->acceptFormat), $format));
+            throw new HttpException(Response::HTTP_UNSUPPORTED_MEDIA_TYPE, \sprintf('Unsupported format, expects "%s", but "%s" given.', implode('", "', (array) $attribute->acceptFormat), $format));
         }
 
         if ($data = $request->request->all()) {
@@ -191,9 +191,9 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         try {
             return $this->serializer->deserialize($data, $type, $format, self::CONTEXT_DESERIALIZE + $attribute->serializationContext);
         } catch (UnsupportedFormatException $e) {
-            throw new HttpException(Response::HTTP_UNSUPPORTED_MEDIA_TYPE, sprintf('Unsupported format: "%s".', $format), $e);
+            throw new HttpException(Response::HTTP_UNSUPPORTED_MEDIA_TYPE, \sprintf('Unsupported format: "%s".', $format), $e);
         } catch (NotEncodableValueException $e) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, sprintf('Request payload contains invalid "%s" data.', $format), $e);
+            throw new HttpException(Response::HTTP_BAD_REQUEST, \sprintf('Request payload contains invalid "%s" data.', $format), $e);
         }
     }
 }

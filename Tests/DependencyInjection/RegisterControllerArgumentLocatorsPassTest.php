@@ -679,7 +679,7 @@ class WithTarget
         string $apiKey,
         #[Target('image.storage')]
         ControllerDummy $service1,
-        ControllerDummy $service2
+        ControllerDummy $service2,
     ) {
     }
 }

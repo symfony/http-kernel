@@ -83,11 +83,11 @@ final class ServiceValueResolver implements ArgumentValueResolverInterface, Valu
         try {
             return [$this->container->get($controller)->get($argument->getName())];
         } catch (RuntimeException $e) {
-            $what = sprintf('argument $%s of "%s()"', $argument->getName(), $controller);
+            $what = \sprintf('argument $%s of "%s()"', $argument->getName(), $controller);
             $message = preg_replace('/service "\.service_locator\.[^"]++"/', $what, $e->getMessage());
 
             if ($e->getMessage() === $message) {
-                $message = sprintf('Cannot resolve %s: %s', $what, $message);
+                $message = \sprintf('Cannot resolve %s: %s', $what, $message);
             }
 
             $r = new \ReflectionProperty($e, 'message');

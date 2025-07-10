@@ -65,7 +65,7 @@ class KernelTest extends TestCase
     public function testEmptyEnv()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(sprintf('Invalid environment provided to "%s": the environment cannot be empty.', KernelForTest::class));
+        $this->expectExceptionMessage(\sprintf('Invalid environment provided to "%s": the environment cannot be empty.', KernelForTest::class));
 
         new KernelForTest('', false);
     }
@@ -321,7 +321,7 @@ class TestClass
     }
 }
 EOF
-, <<<'EOF'
+                , <<<'EOF'
 <?php
 include_once \dirname(__DIR__).'/foo.php';
 $string = 'string should not be   modified';
@@ -523,7 +523,7 @@ EOF
 
     public function testKernelExtension()
     {
-        $kernel = new class() extends CustomProjectDirKernel implements ExtensionInterface {
+        $kernel = new class extends CustomProjectDirKernel implements ExtensionInterface {
             public function load(array $configs, ContainerBuilder $container): void
             {
                 $container->setParameter('test.extension-registered', true);

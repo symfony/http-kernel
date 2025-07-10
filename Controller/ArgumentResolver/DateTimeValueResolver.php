@@ -90,7 +90,7 @@ final class DateTimeValueResolver implements ArgumentValueResolverInterface, Val
         }
 
         if (!$date) {
-            throw new NotFoundHttpException(sprintf('Invalid date given for parameter "%s".', $argument->getName()));
+            throw new NotFoundHttpException(\sprintf('Invalid date given for parameter "%s".', $argument->getName()));
         }
 
         return [$date];
