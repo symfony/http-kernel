@@ -222,7 +222,7 @@ class ResponseCacheStrategy implements ResponseCacheStrategyInterface
         }
 
         if (false !== $this->ageDirectives[$directive]) {
-            $value = min($value ?? PHP_INT_MAX, $expires ?? PHP_INT_MAX);
+            $value = min($value ?? \PHP_INT_MAX, $expires ?? \PHP_INT_MAX);
             $value -= $age;
             $this->ageDirectives[$directive] = null !== $this->ageDirectives[$directive] ? min($this->ageDirectives[$directive], $value) : $value;
         }
