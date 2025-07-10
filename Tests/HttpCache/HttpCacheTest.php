@@ -714,7 +714,7 @@ class HttpCacheTest extends HttpCacheTestCase
         $this->request('GET', '/'); // warm the cache
 
         // Use a store that simulates a cache entry being locked upon first attempt
-        $this->store = new class(sys_get_temp_dir() . '/http_cache') extends Store {
+        $this->store = new class(sys_get_temp_dir().'/http_cache') extends Store {
             private bool $hasLock = false;
 
             public function lock(Request $request): bool

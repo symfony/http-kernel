@@ -115,7 +115,7 @@ abstract class HttpCacheTestCase extends TestCase
 
         $this->kernel->reset();
 
-        if (! $this->store) {
+        if (!$this->store) {
             $this->store = $this->createStore();
         }
 
@@ -188,6 +188,6 @@ abstract class HttpCacheTestCase extends TestCase
 
     protected function createStore(): Store
     {
-        return new Store(sys_get_temp_dir() . '/http_cache');
+        return new Store(sys_get_temp_dir().'/http_cache');
     }
 }
