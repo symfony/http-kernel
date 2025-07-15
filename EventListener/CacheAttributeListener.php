@@ -51,7 +51,7 @@ class CacheAttributeListener implements EventSubscriberInterface
     {
         $request = $event->getRequest();
 
-        if (!\is_array($attributes = $request->attributes->get('_cache') ?? $event->getAttributes()[Cache::class] ?? null)) {
+        if (!$attributes = $request->attributes->get('_cache') ?? $event->getAttributes(Cache::class)) {
             return;
         }
 
