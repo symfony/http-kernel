@@ -4,10 +4,11 @@ CHANGELOG
 8.0
 ---
 
-* Remove `AddAnnotatedClassesToCachePass`
-* Remove `Extension::getAnnotatedClassesToCompile()` and `Extension::addAnnotatedClassesToCompile()`
-* Remove `Kernel::getAnnotatedClassesToCompile()` and `Kernel::setAnnotatedClassCache()`
-* Make `ServicesResetter` class `final`
+ * Remove `AddAnnotatedClassesToCachePass`
+ * Remove `Extension::getAnnotatedClassesToCompile()` and `Extension::addAnnotatedClassesToCompile()`
+ * Remove `Kernel::getAnnotatedClassesToCompile()` and `Kernel::setAnnotatedClassCache()`
+ * Make `ServicesResetter` class `final`
+ * Add argument `$logChannel` to `ErrorListener::logException()`
 
 7.3
 ---
