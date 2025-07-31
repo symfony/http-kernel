@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpKernel\Tests\DataCollector;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\ErrorHandler\Exception\SilencedErrorContext;
 use Symfony\Component\HttpFoundation\Request;
@@ -132,9 +133,7 @@ class LoggerDataCollectorTest extends TestCase
         $c->lateCollect();
     }
 
-    /**
-     * @dataProvider getCollectTestData
-     */
+    #[DataProvider('getCollectTestData')]
     public function testCollect($nb, $logs, $expectedLogs, $expectedDeprecationCount, $expectedScreamCount, $expectedPriorities = null)
     {
         $logger = $this

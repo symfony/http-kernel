@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\HttpKernel\Tests\HttpCache;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,9 +24,7 @@ use Symfony\Component\HttpKernel\HttpCache\StoreInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
 
-/**
- * @group time-sensitive
- */
+#[Group('time-sensitive')]
 class HttpCacheTest extends HttpCacheTestCase
 {
     public function testTerminateDelegatesTerminationOnlyForTerminableInterface()
@@ -1668,9 +1668,7 @@ class HttpCacheTest extends HttpCacheTestCase
         });
     }
 
-    /**
-     * @dataProvider getTrustedProxyData
-     */
+    #[DataProvider('getTrustedProxyData')]
     public function testHttpCacheIsSetAsATrustedProxy(array $existing)
     {
         Request::setTrustedProxies($existing, Request::HEADER_X_FORWARDED_FOR);
@@ -1697,9 +1695,7 @@ class HttpCacheTest extends HttpCacheTestCase
         ];
     }
 
-    /**
-     * @dataProvider getForwardedData
-     */
+    #[DataProvider('getForwardedData')]
     public function testForwarderHeaderForForwardedRequests($forwarded, $expected)
     {
         $this->setNextResponse();
@@ -1875,9 +1871,7 @@ class HttpCacheTest extends HttpCacheTestCase
         $this->assertEquals(500, $this->response->getStatusCode()); // fail
     }
 
-    /**
-     * @dataProvider getResponseDataThatMayBeServedStaleIfError
-     */
+    #[DataProvider('getResponseDataThatMayBeServedStaleIfError')]
     public function testResponsesThatMayBeUsedStaleIfError($responseHeaders, $sleepBetweenRequests = null)
     {
         $responses = [
@@ -1918,9 +1912,7 @@ class HttpCacheTest extends HttpCacheTestCase
         yield 'public, s-maxage will be served stale-if-error, even if the RFC mandates otherwise' => [['Cache-Control' => 'public, s-maxage=20'], 25];
     }
 
-    /**
-     * @dataProvider getResponseDataThatMustNotBeServedStaleIfError
-     */
+    #[DataProvider('getResponseDataThatMustNotBeServedStaleIfError')]
     public function testResponsesThatMustNotBeUsedStaleIfError($responseHeaders, $sleepBetweenRequests = null)
     {
         $responses = [

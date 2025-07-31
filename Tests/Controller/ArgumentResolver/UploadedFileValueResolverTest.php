@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpKernel\Tests\Controller\ArgumentResolver;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,9 +29,7 @@ class UploadedFileValueResolverTest extends TestCase
 {
     private const FIXTURES_BASE_PATH = __DIR__.'/../../Fixtures/Controller/ArgumentResolver/UploadedFile';
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testDefaults(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile();
@@ -60,9 +59,7 @@ class UploadedFileValueResolverTest extends TestCase
         $this->assertSame(36, $data->getSize());
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testEmpty(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile();
@@ -88,9 +85,7 @@ class UploadedFileValueResolverTest extends TestCase
         $this->assertSame([], $data);
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testCustomName(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile(name: 'bar');
@@ -120,9 +115,7 @@ class UploadedFileValueResolverTest extends TestCase
         $this->assertSame(71, $data->getSize());
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testConstraintsWithoutViolation(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile(constraints: new Assert\File(maxSize: 100));
@@ -152,9 +145,7 @@ class UploadedFileValueResolverTest extends TestCase
         $this->assertSame(71, $data->getSize());
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testConstraintsWithViolation(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile(constraints: new Assert\File(maxSize: 50));
@@ -181,9 +172,7 @@ class UploadedFileValueResolverTest extends TestCase
         $resolver->onKernelControllerArguments($event);
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testMultipleFilesArray(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile();
@@ -215,9 +204,7 @@ class UploadedFileValueResolverTest extends TestCase
         $this->assertSame(71, $data[1]->getSize());
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testMultipleFilesArrayConstraints(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile(constraints: new Assert\File(maxSize: 50));
@@ -244,9 +231,7 @@ class UploadedFileValueResolverTest extends TestCase
         $resolver->onKernelControllerArguments($event);
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testMultipleFilesVariadic(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile();
@@ -278,9 +263,7 @@ class UploadedFileValueResolverTest extends TestCase
         $this->assertSame(71, $data[1]->getSize());
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testMultipleFilesVariadicConstraints(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile(constraints: new Assert\File(maxSize: 50));
@@ -307,9 +290,7 @@ class UploadedFileValueResolverTest extends TestCase
         $resolver->onKernelControllerArguments($event);
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testShouldAllowEmptyWhenNullable(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile();
@@ -337,9 +318,7 @@ class UploadedFileValueResolverTest extends TestCase
         $this->assertNull($data);
     }
 
-    /**
-     * @dataProvider provideContext
-     */
+    #[DataProvider('provideContext')]
     public function testShouldAllowEmptyWhenHasDefaultValue(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile();
