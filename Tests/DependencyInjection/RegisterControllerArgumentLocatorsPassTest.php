@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpKernel\Tests\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Argument\LazyClosure;
 use Symfony\Component\DependencyInjection\Argument\RewindableGenerator;
@@ -307,9 +308,7 @@ class RegisterControllerArgumentLocatorsPassTest extends TestCase
         $this->assertFalse($container->getDefinition('foo')->isLazy());
     }
 
-    /**
-     * @dataProvider provideBindings
-     */
+    #[DataProvider('provideBindings')]
     public function testBindings($bindingName)
     {
         $container = new ContainerBuilder();
@@ -339,9 +338,7 @@ class RegisterControllerArgumentLocatorsPassTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provideBindScalarValueToControllerArgument
-     */
+    #[DataProvider('provideBindScalarValueToControllerArgument')]
     public function testBindScalarValueToControllerArgument($bindingKey)
     {
         $container = new ContainerBuilder();

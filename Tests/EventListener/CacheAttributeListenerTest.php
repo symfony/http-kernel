@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpKernel\Tests\EventListener;
 
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -217,10 +218,8 @@ class CacheAttributeListenerTest extends TestCase
         $this->assertSame('86400', $this->response->headers->getCacheControlDirective('stale-if-error'));
     }
 
-    /**
-     * @testWith ["test.getDate()"]
-     *           ["date"]
-     */
+    #[TestWith(['test.getDate()'])]
+    #[TestWith(['date'])]
     public function testLastModifiedNotModifiedResponse(string $expression)
     {
         $entity = new TestEntity();
@@ -238,10 +237,8 @@ class CacheAttributeListenerTest extends TestCase
         $this->assertSame(304, $response->getStatusCode());
     }
 
-    /**
-     * @testWith ["test.getDate()"]
-     *           ["date"]
-     */
+    #[TestWith(['test.getDate()'])]
+    #[TestWith(['date'])]
     public function testLastModifiedHeader(string $expression)
     {
         $entity = new TestEntity();
@@ -264,10 +261,8 @@ class CacheAttributeListenerTest extends TestCase
         $this->assertSame('Fri, 23 Aug 2013 00:00:00 GMT', $response->headers->get('Last-Modified'));
     }
 
-    /**
-     * @testWith ["test.getId()"]
-     *           ["id"]
-     */
+    #[TestWith(['test.getId()'])]
+    #[TestWith(['id'])]
     public function testEtagNotModifiedResponse(string $expression)
     {
         $entity = new TestEntity();
@@ -285,10 +280,8 @@ class CacheAttributeListenerTest extends TestCase
         $this->assertSame(304, $response->getStatusCode());
     }
 
-    /**
-     * @testWith ["test.getId()"]
-     *           ["id"]
-     */
+    #[TestWith(['test.getId()'])]
+    #[TestWith(['id'])]
     public function testEtagHeader(string $expression)
     {
         $entity = new TestEntity();

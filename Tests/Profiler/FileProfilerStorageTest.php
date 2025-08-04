@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpKernel\Tests\Profiler;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpKernel\Profiler\FileProfilerStorage;
 use Symfony\Component\HttpKernel\Profiler\Profile;
@@ -351,9 +352,7 @@ class FileProfilerStorageTest extends TestCase
         $this->assertFalse(fgetcsv($handle, null, ',', '"', '\\'));
     }
 
-    /**
-     * @dataProvider provideExpiredProfiles
-     */
+    #[DataProvider('provideExpiredProfiles')]
     public function testRemoveExpiredProfiles(string $index, string $expectedOffset)
     {
         $file = $this->tmpDir.'/index.csv';

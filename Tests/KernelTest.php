@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpKernel\Tests;
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -485,9 +486,7 @@ class KernelTest extends TestCase
         $this->assertEquals(1, ResettableService::$counter);
     }
 
-    /**
-     * @group time-sensitive
-     */
+    #[Group('time-sensitive')]
     public function testKernelStartTimeIsResetWhileBootingAlreadyBootedKernel()
     {
         $kernel = $this->getKernel(['initializeBundles'], [], true);
