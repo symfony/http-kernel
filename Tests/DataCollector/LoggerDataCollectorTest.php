@@ -33,7 +33,7 @@ class LoggerDataCollectorTest extends TestCase
 
         $c = new LoggerDataCollector($logger, __DIR__.'/');
         $c->lateCollect();
-        $compilerLogs = $c->getCompilerLogs()->getValue('message');
+        $compilerLogs = $c->getCompilerLogs()->getValue(true);
 
         $this->assertSame([
             ['message' => 'Removed service "Psr\Container\ContainerInterface"; reason: private alias.'],

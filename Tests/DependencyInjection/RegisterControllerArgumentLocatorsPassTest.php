@@ -510,7 +510,7 @@ class RegisterControllerArgumentLocatorsPassTest extends TestCase
         $this->assertInstanceOf(\stdClass::class, $locator->get('serviceAsValue'));
         $this->assertInstanceOf(\stdClass::class, $locator->get('expressionAsValue'));
         $this->assertSame('bar', $locator->get('rawValue'));
-        $this->stringContains('Symfony_Component_HttpKernel_Tests_Fixtures_Suit_APP_SUIT', $locator->get('suit'));
+        $this->assertStringContainsString('Symfony_Component_HttpKernel_Tests_Fixtures_Suit_APP_SUIT', $locator->get('suit'));
         $this->assertSame('@bar', $locator->get('escapedRawValue'));
         $this->assertSame('foo', $locator->get('customAutowire'));
         $this->assertInstanceOf(FooInterface::class, $autowireCallable = $locator->get('autowireCallable'));
