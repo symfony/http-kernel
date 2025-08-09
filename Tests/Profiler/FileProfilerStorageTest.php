@@ -370,17 +370,17 @@ class FileProfilerStorageTest extends TestCase
 
         yield 'One unexpired profile' => [
             <<<CSV
-            token0,127.0.0.0,,http://foo.bar/0,{$oneHourAgo->getTimestamp()},,
+                token0,127.0.0.0,,http://foo.bar/0,{$oneHourAgo->getTimestamp()},,
 
-            CSV,
+                CSV,
             '0',
         ];
 
         yield 'One unexpired profile with virtual type' => [
             <<<CSV
-            token0,127.0.0.0,,http://foo.bar/0,{$oneHourAgo->getTimestamp()},,virtual
+                token0,127.0.0.0,,http://foo.bar/0,{$oneHourAgo->getTimestamp()},,virtual
 
-            CSV,
+                CSV,
             '0',
         ];
 
@@ -388,17 +388,17 @@ class FileProfilerStorageTest extends TestCase
 
         yield 'One expired profile' => [
             <<<CSV
-            token0,127.0.0.0,,http://foo.bar/0,{$threeDaysAgo->getTimestamp()},,
+                token0,127.0.0.0,,http://foo.bar/0,{$threeDaysAgo->getTimestamp()},,
 
-            CSV,
+                CSV,
             '48',
         ];
 
         yield 'One expired profile with virtual type' => [
             <<<CSV
-            token0,127.0.0.0,,http://foo.bar/0,{$threeDaysAgo->getTimestamp()},,virtual
+                token0,127.0.0.0,,http://foo.bar/0,{$threeDaysAgo->getTimestamp()},,virtual
 
-            CSV,
+                CSV,
             '55',
         ];
 
@@ -408,21 +408,21 @@ class FileProfilerStorageTest extends TestCase
 
         yield 'Multiple expired profiles' => [
             <<<CSV
-            token0,127.0.0.0,,http://foo.bar/0,{$fourDaysAgo->getTimestamp()},,
-            token1,127.0.0.1,,http://foo.bar/1,{$threeDaysAgo->getTimestamp()},,
-            token2,127.0.0.2,,http://foo.bar/2,{$oneHourAgo->getTimestamp()},,
+                token0,127.0.0.0,,http://foo.bar/0,{$fourDaysAgo->getTimestamp()},,
+                token1,127.0.0.1,,http://foo.bar/1,{$threeDaysAgo->getTimestamp()},,
+                token2,127.0.0.2,,http://foo.bar/2,{$oneHourAgo->getTimestamp()},,
 
-            CSV,
+                CSV,
             '96',
         ];
 
         yield 'Multiple expired profiles with virtual type' => [
             <<<CSV
-            token0,127.0.0.0,,http://foo.bar/0,{$fourDaysAgo->getTimestamp()},,virtual
-            token1,127.0.0.1,,http://foo.bar/1,{$threeDaysAgo->getTimestamp()},,virtual
-            token2,127.0.0.2,,http://foo.bar/2,{$oneHourAgo->getTimestamp()},,virtual
+                token0,127.0.0.0,,http://foo.bar/0,{$fourDaysAgo->getTimestamp()},,virtual
+                token1,127.0.0.1,,http://foo.bar/1,{$threeDaysAgo->getTimestamp()},,virtual
+                token2,127.0.0.2,,http://foo.bar/2,{$oneHourAgo->getTimestamp()},,virtual
 
-            CSV,
+                CSV,
             '110',
         ];
     }
