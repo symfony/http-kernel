@@ -392,7 +392,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
         $oldContainer = \is_object($this->container) ? new \ReflectionClass($this->container) : $this->container = null;
 
         try {
-            is_dir($buildDir) ?: mkdir($buildDir, 0777, true);
+            is_dir($buildDir) ?: mkdir($buildDir, 0o777, true);
 
             if ($lock = fopen($cachePath.'.lock', 'w+')) {
                 if (!flock($lock, \LOCK_EX | \LOCK_NB, $wouldBlock) && !flock($lock, $wouldBlock ? \LOCK_SH : \LOCK_EX)) {
@@ -571,7 +571,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
     {
         foreach (['cache' => $this->getCacheDir(), 'build' => $this->warmupDir ?: $this->getBuildDir()] as $name => $dir) {
             if (!is_dir($dir)) {
-                if (false === @mkdir($dir, 0777, true) && !is_dir($dir)) {
+                if (false === @mkdir($dir, 0o777, true) && !is_dir($dir)) {
                     throw new \RuntimeException(\sprintf('Unable to create the "%s" directory (%s).', $name, $dir));
                 }
             } elseif (!is_writable($dir)) {
@@ -671,7 +671,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
 
         foreach ($content as $file => $code) {
             $fs->dumpFile($dir.$file, $code);
-            @chmod($dir.$file, 0666 & ~umask());
+            @chmod($dir.$file, 0o666 & ~umask());
         }
         $legacyFile = \dirname($dir.key($content)).'.legacy';
         if (is_file($legacyFile)) {
