@@ -84,26 +84,67 @@ abstract class DataCollector implements DataCollectorInterface
         ] + ReflectionCaster::UNSET_CLOSURE_FILE_INFO;
     }
 
+    public function __serialize(): array
+    {
+        if (self::class === (new \ReflectionMethod($this, '__sleep'))->class) {
+            return ['data' => $this->data];
+        }
+
+        trigger_deprecation('symfony/http-kernel', '7.4', 'Implementing "%s::__sleep()" is deprecated, use "__serialize()" instead.', get_debug_type($this));
+
+        $data = [];
+        foreach ($this->__sleep() as $key) {
+            try {
+                if (($r = new \ReflectionProperty($this, $key))->isInitialized($this)) {
+                    $data[$key] = $r->getValue($this);
+                }
+            } catch (\ReflectionException) {
+                $data[$key] = $this->$key;
+            }
+        }
+
+        return $data;
+    }
+
+    public function __unserialize(array $data): void
+    {
+        if (self::class !== (new \ReflectionMethod($this, '__wakeup'))->class) {
+            trigger_deprecation('symfony/http-kernel', '7.4', 'Implementing "%s::__wakeup()" is deprecated, use "__unserialize()" instead.', get_debug_type($this));
+        }
+
+        if (\in_array(array_keys($data), [['data'], ["\0*\0data"]], true)) {
+            $this->data = $data['data'] ?? $data["\0*\0data"];
+
+            return;
+        }
+
+        trigger_deprecation('symfony/http-kernel', '7.4', 'Passing more than just key "data" to "%s::__unserialize()" is deprecated, populate properties in "%s::__unserialize()" instead.', self::class, get_debug_type($this));
+
+        \Closure::bind(function ($data) {
+            foreach ($data as $key => $value) {
+                $this->{("\0" === $key[0] ?? '') ? substr($key, 1 + strrpos($key, "\0")) : $key} = $value;
+            }
+
+            $this->__wakeup();
+        }, $this, static::class)($data);
+    }
+
+    /**
+     * @internal since Symfony 7.4, will be removed in 8.0
+     *
+     * @final since Symfony 7.4, will be removed in 8.0
+     */
     public function __sleep(): array
     {
         return ['data'];
     }
 
+    /**
+     * @internal since Symfony 7.4, will be removed in 8.0
+     *
+     * @final since Symfony 7.4, will be removed in 8.0
+     */
     public function __wakeup(): void
-    {
-    }
-
-    /**
-     * @internal to prevent implementing \Serializable
-     */
-    final protected function serialize(): void
-    {
-    }
-
-    /**
-     * @internal to prevent implementing \Serializable
-     */
-    final protected function unserialize(string $data): void
     {
     }
 
