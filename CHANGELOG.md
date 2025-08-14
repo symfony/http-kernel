@@ -10,6 +10,13 @@ CHANGELOG
  * Make `ServicesResetter` class `final`
  * Add argument `$logChannel` to `ErrorListener::logException()`
 
+7.4
+---
+
+ * Deprecate implementing `__sleep/wakeup()` on kernels; use `__(un)serialize()` instead
+ * Deprecate implementing `__sleep/wakeup()` on data collectors; use `__(un)serialize()` instead
+ * Make `Profile` final and `Profiler::__sleep()` internal
+
 7.3
 ---
 
