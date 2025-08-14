@@ -108,24 +108,30 @@ abstract class DataCollector implements DataCollectorInterface
 
     public function __unserialize(array $data): void
     {
-        if (self::class !== (new \ReflectionMethod($this, '__wakeup'))->class) {
+        if ($wakeup = self::class !== (new \ReflectionMethod($this, '__wakeup'))->class) {
             trigger_deprecation('symfony/http-kernel', '7.4', 'Implementing "%s::__wakeup()" is deprecated, use "__unserialize()" instead.', get_debug_type($this));
         }
 
         if (\in_array(array_keys($data), [['data'], ["\0*\0data"]], true)) {
             $this->data = $data['data'] ?? $data["\0*\0data"];
 
+            if ($wakeup) {
+                $this->__wakeup();
+            }
+
             return;
         }
 
         trigger_deprecation('symfony/http-kernel', '7.4', 'Passing more than just key "data" to "%s::__unserialize()" is deprecated, populate properties in "%s::__unserialize()" instead.', self::class, get_debug_type($this));
 
-        \Closure::bind(function ($data) {
+        \Closure::bind(function ($data) use ($wakeup) {
             foreach ($data as $key => $value) {
                 $this->{("\0" === $key[0] ?? '') ? substr($key, 1 + strrpos($key, "\0")) : $key} = $value;
             }
 
-            $this->__wakeup();
+            if ($wakeup) {
+                $this->__wakeup();
+            }
         }, $this, static::class)($data);
     }
 
@@ -136,6 +142,8 @@ abstract class DataCollector implements DataCollectorInterface
      */
     public function __sleep(): array
     {
+        trigger_deprecation('symfony/http-kernel', '7.4', 'Calling "%s::__sleep()" is deprecated, use "__serialize()" instead.', get_debug_type($this));
+
         return ['data'];
     }
 
@@ -146,6 +154,7 @@ abstract class DataCollector implements DataCollectorInterface
      */
     public function __wakeup(): void
     {
+        trigger_deprecation('symfony/http-kernel', '7.4', 'Calling "%s::__wakeup()" is deprecated, use "__unserialize()" instead.', get_debug_type($this));
     }
 
     /**
