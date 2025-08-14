@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  *
- * @final since Symfony 7.4
+ * @final
  */
 class Profile
 {
@@ -248,11 +248,19 @@ class Profile
         return isset($this->collectors[$name]);
     }
 
-    /**
-     * @internal since Symfony 7.4, will be replaced by `__serialize()` in 8.0
-     */
-    public function __sleep(): array
+    public function __serialize(): array
     {
-        return ['token', 'parent', 'children', 'collectors', 'ip', 'method', 'url', 'time', 'statusCode', 'virtualType'];
+        return [
+            'token' => $this->token,
+            'parent' => $this->parent,
+            'children' => $this->children,
+            'collectors' => $this->collectors,
+            'ip' => $this->ip,
+            'method' => $this->method,
+            'url' => $this->url,
+            'time' => $this->time,
+            'statusCode' => $this->statusCode,
+            'virtualType' => $this->virtualType,
+        ];
     }
 }

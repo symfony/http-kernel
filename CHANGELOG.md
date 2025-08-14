@@ -9,6 +9,7 @@ CHANGELOG
  * Remove `Kernel::getAnnotatedClassesToCompile()` and `Kernel::setAnnotatedClassCache()`
  * Make `ServicesResetter` class `final`
  * Add argument `$logChannel` to `ErrorListener::logException()`
+ * Replace `__sleep/wakeup()` by `__(un)serialize()` on kernels and data collectors
 
 7.4
 ---
