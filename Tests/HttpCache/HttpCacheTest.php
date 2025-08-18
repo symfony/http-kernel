@@ -2062,6 +2062,93 @@ class HttpCacheTest extends HttpCacheTestCase
         $this->assertTrue($this->response->headers->has('X-Symfony-Cache'));
         $this->assertEquals('miss', $this->response->headers->get('X-Symfony-Cache'));
     }
+
+    public function testQueryMethodIsCacheable()
+    {
+        $this->setNextResponse(200, ['Cache-Control' => 'public, max-age=10000'], 'Query result', function (Request $request) {
+            $this->assertSame('QUERY', $request->getMethod());
+
+            return '{"query": "users"}' === $request->getContent();
+        });
+
+        $this->kernel->reset();
+        $this->store = $this->createStore();
+        $this->cacheConfig['debug'] = true;
+        $this->cache = new HttpCache($this->kernel, $this->store, null, $this->cacheConfig);
+
+        $request1 = Request::create('/', 'QUERY', [], [], [], [], '{"query": "users"}');
+        $this->response = $this->cache->handle($request1, HttpKernelInterface::MAIN_REQUEST, $this->catch);
+
+        $this->assertSame(200, $this->response->getStatusCode());
+        $this->assertTraceContains('miss');
+        $this->assertSame('Query result', $this->response->getContent());
+
+        $request2 = Request::create('/', 'QUERY', [], [], [], [], '{"query": "users"}');
+        $this->response = $this->cache->handle($request2, HttpKernelInterface::MAIN_REQUEST, $this->catch);
+
+        $this->assertSame(200, $this->response->getStatusCode());
+        $this->assertTrue($this->response->headers->has('Age'));
+        $this->assertSame('Query result', $this->response->getContent());
+    }
+
+    public function testQueryMethodDifferentBodiesCreateDifferentCacheEntries()
+    {
+        $this->setNextResponses([
+            [
+                'status' => 200,
+                'body' => 'Users result',
+                'headers' => ['Cache-Control' => 'public, max-age=10000'],
+            ],
+            [
+                'status' => 200,
+                'body' => 'Posts result',
+                'headers' => ['Cache-Control' => 'public, max-age=10000'],
+            ],
+        ]);
+
+        $this->store = $this->createStore();
+        $this->cacheConfig['debug'] = true;
+        $this->cache = new HttpCache($this->kernel, $this->store, null, $this->cacheConfig);
+
+        $request1 = Request::create('/', 'QUERY', [], [], [], [], '{"query": "users"}');
+        $this->response = $this->cache->handle($request1, HttpKernelInterface::MAIN_REQUEST, $this->catch);
+
+        $this->assertSame('Users result', $this->response->getContent());
+        $this->assertTraceContains('miss');
+
+        $request2 = Request::create('/', 'QUERY', [], [], [], [], '{"query": "posts"}');
+        $this->response = $this->cache->handle($request2, HttpKernelInterface::MAIN_REQUEST, $this->catch);
+
+        $this->assertSame('Posts result', $this->response->getContent());
+        $this->assertTraceContains('miss');
+
+        $request3 = Request::create('/', 'QUERY', [], [], [], [], '{"query": "users"}');
+        $this->response = $this->cache->handle($request3, HttpKernelInterface::MAIN_REQUEST, $this->catch);
+
+        $this->assertSame('Users result', $this->response->getContent());
+        $this->assertTrue($this->response->headers->has('Age'));
+    }
+
+    public function testQueryMethodWithEmptyBodyIsCacheable()
+    {
+        $this->setNextResponse(200, ['Cache-Control' => 'public, max-age=10000'], 'Empty query result');
+        $this->kernel->reset();
+        $this->store = $this->createStore();
+        $this->cacheConfig['debug'] = true;
+        $this->cache = new HttpCache($this->kernel, $this->store, null, $this->cacheConfig);
+
+        $request1 = Request::create('/', 'QUERY', [], [], [], [], '');
+        $this->response = $this->cache->handle($request1, HttpKernelInterface::MAIN_REQUEST, $this->catch);
+
+        $this->assertSame(200, $this->response->getStatusCode());
+        $this->assertTraceContains('miss');
+
+        $request2 = Request::create('/', 'QUERY', [], [], [], [], '');
+        $this->response = $this->cache->handle($request2, HttpKernelInterface::MAIN_REQUEST, $this->catch);
+
+        $this->assertSame(200, $this->response->getStatusCode());
+        $this->assertTrue($this->response->headers->has('Age'));
+    }
 }
 
 class TestKernel implements HttpKernelInterface
