@@ -4,6 +4,7 @@ CHANGELOG
 8.1
 ---
 
+ * Validate typed route parameters before calling controllers and return an HTTP error when an invalid value is provided
  * Add `ControllerAttributeEvent` et al. to dispatch events named after controller attributes
  * Add support for `UploadedFile` when using `MapRequestPayload`
  * Add support for bundles as compiler pass
