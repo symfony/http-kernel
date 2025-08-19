@@ -232,10 +232,10 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
 
     private function mapUploadedFile(Request $request, ArgumentMetadata $argument, MapUploadedFile $attribute): UploadedFile|array|null
     {
-        if (!($files = $request->files->get($attribute->name ?? $argument->getName(), [])) && ($argument->isNullable() || $argument->hasDefaultValue())) {
+        if (!($files = $request->files->get($attribute->name ?? $argument->getName())) && ($argument->isNullable() || $argument->hasDefaultValue())) {
             return null;
         }
 
-        return $files;
+        return $files ?? ('array' === $argument->getType() ? [] : null);
     }
 }
