@@ -143,9 +143,6 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         $this->clonesIndex = 0;
     }
 
-    /**
-     * @internal
-     */
     public function __serialize(): array
     {
         if (!$this->dataCount) {
@@ -164,9 +161,6 @@ class DumpDataCollector extends DataCollector implements DataDumperInterface
         return ['data' => $this->data];
     }
 
-    /**
-     * @internal
-     */
     public function __unserialize(array $data): void
     {
         $this->data = array_pop($data) ?? [];
