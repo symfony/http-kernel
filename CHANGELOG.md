@@ -17,6 +17,7 @@ CHANGELOG
  * Add support for the `QUERY` HTTP method
  * Deprecate implementing `__sleep/wakeup()` on kernels; use `__(un)serialize()` instead
  * Deprecate implementing `__sleep/wakeup()` on data collectors; use `__(un)serialize()` instead
+ * Add `#[IsSignatureValid]` attribute to validate URI signatures
  * Make `Profile` final and `Profiler::__sleep()` internal
 
 7.3
