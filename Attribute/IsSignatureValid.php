@@ -29,17 +29,13 @@ final class IsSignatureValid
 {
     /** @var string[] */
     public readonly array $methods;
-    public readonly ?string $signer;
 
     /**
      * @param string[]|string $methods HTTP methods that require signature validation. An empty array means that no method filtering is done
-     * @param string          $signer  The ID of the UriSigner service to use for signature validation. Defaults to 'uri_signer'
      */
     public function __construct(
         array|string $methods = [],
-        ?string $signer = null,
     ) {
         $this->methods = (array) $methods;
-        $this->signer = $signer;
     }
 }
