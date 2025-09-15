@@ -39,14 +39,4 @@ class IsSignatureValidAttributeMethodsController
     public function withGetAndPost()
     {
     }
-
-    #[IsSignatureValid(signer: 'app.test.signer')]
-    public function withCustomSigner()
-    {
-    }
-
-    #[IsSignatureValid(signer: 'app.test.extended_signer')]
-    public function withCustomExtendedSigner()
-    {
-    }
 }

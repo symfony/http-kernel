@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\HttpKernel\EventListener;
 
-use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\HttpKernel\Attribute\IsSignatureValid;
@@ -27,7 +26,6 @@ class IsSignatureValidAttributeListener implements EventSubscriberInterface
 {
     public function __construct(
         private readonly UriSigner $uriSigner,
-        private readonly ContainerInterface $container,
     ) {
     }
 
@@ -44,17 +42,7 @@ class IsSignatureValidAttributeListener implements EventSubscriberInterface
                 continue;
             }
 
-            if (null === $attribute->signer) {
-                $this->uriSigner->verify($request);
-                continue;
-            }
-
-            $signer = $this->container->get($attribute->signer);
-            if (!$signer instanceof UriSigner) {
-                throw new \LogicException(\sprintf('The service "%s" is not an instance of "%s".', $attribute->signer, UriSigner::class));
-            }
-
-            $signer->verify($request);
+            $this->uriSigner->verify($request);
         }
     }
 
