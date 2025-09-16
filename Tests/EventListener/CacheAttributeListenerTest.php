@@ -365,6 +365,70 @@ class CacheAttributeListenerTest extends TestCase
         $this->assertSame(CacheAttributeController::CLASS_SMAXAGE, $response->getMaxAge());
     }
 
+    /**
+     * @dataProvider provideVaryHeaderScenarios
+     */
+    public function testHasRelevantVaryHeaderBehavior(array $responseVary, array $cacheVary, bool $varyByLanguage, array $expectedVary)
+    {
+        $request = $this->createRequest(new Cache(vary: $cacheVary));
+        $request->attributes->set('_vary_by_language', $varyByLanguage);
+
+        $response = new Response();
+        $response->setVary($responseVary);
+
+        $listener = new CacheAttributeListener();
+        $event = new ResponseEvent($this->getKernel(), $request, HttpKernelInterface::MAIN_REQUEST, $response);
+        $listener->onKernelResponse($event);
+
+        $this->assertSame($expectedVary, $response->getVary());
+    }
+
+    public static function provideVaryHeaderScenarios(): \Traversable
+    {
+        yield 'no vary headers at all' => [
+            'responseVary' => [],
+            'cacheVary' => ['X-Foo'],
+            'varyByLanguage' => false,
+            'expectedVary' => ['X-Foo'],
+        ];
+        yield 'response vary accept-language only, vary_by_language true (append new)' => [
+            'responseVary' => ['Accept-Language'],
+            'cacheVary' => ['X-Bar'],
+            'varyByLanguage' => true,
+            'expectedVary' => ['Accept-Language', 'X-Bar'], // X-Bar is added
+        ];
+        yield 'response vary accept-language only, vary_by_language false (no append)' => [
+            'responseVary' => ['Accept-Language'],
+            'cacheVary' => ['X-Bar'],
+            'varyByLanguage' => false,
+            'expectedVary' => ['Accept-Language'], // no append
+        ];
+        yield 'response vary multiple including accept-language, vary_by_language true (no append)' => [
+            'responseVary' => ['Accept-Language', 'User-Agent'],
+            'cacheVary' => ['X-Baz'],
+            'varyByLanguage' => true,
+            'expectedVary' => ['Accept-Language', 'User-Agent'], // no append
+        ];
+        yield 'cache vary is empty' => [
+            'responseVary' => ['X-Existing'],
+            'cacheVary' => [],
+            'varyByLanguage' => true,
+            'expectedVary' => ['X-Existing'], // nothing to add
+        ];
+        yield 'vary * (no append) — vary_by_language=true' => [
+            'responseVary' => ['*'],
+            'cacheVary' => ['X-Foo'],
+            'varyByLanguage' => true,
+            'expectedVary' => ['*'],
+        ];
+        yield 'vary * (no append) — vary_by_language=false' => [
+            'responseVary' => ['*'],
+            'cacheVary' => ['X-Foo'],
+            'varyByLanguage' => false,
+            'expectedVary' => ['*'],
+        ];
+    }
+
     private function createRequest(Cache $cache): Request
     {
         return new Request([], [], ['_cache' => [$cache]]);
