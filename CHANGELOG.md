@@ -9,6 +9,7 @@ CHANGELOG
  * Deprecate implementing `__sleep/wakeup()` on data collectors; use `__(un)serialize()` instead
  * Add `#[IsSignatureValid]` attribute to validate URI signatures
  * Make `Profile` final and `Profiler::__sleep()` internal
+ * Collect the application runner class
 
 7.3
 ---
