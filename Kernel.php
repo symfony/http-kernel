@@ -714,15 +714,16 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
     {
         $env = $this->getEnvironment();
         $locator = new FileLocator($this);
-        $resolver = new LoaderResolver([
+        $resolver = new LoaderResolver(array_merge(class_exists(XmlFileLoader::class) ? [
             new XmlFileLoader($container, $locator, $env),
+        ] : [], [
             new YamlFileLoader($container, $locator, $env),
             new IniFileLoader($container, $locator, $env),
             new PhpFileLoader($container, $locator, $env, class_exists(ConfigBuilderGenerator::class) ? new ConfigBuilderGenerator($this->getBuildDir()) : null),
             new GlobFileLoader($container, $locator, $env),
             new DirectoryLoader($container, $locator, $env),
             new ClosureLoader($container, $env),
-        ]);
+        ]));
 
         return new DelegatingLoader($resolver);
     }
