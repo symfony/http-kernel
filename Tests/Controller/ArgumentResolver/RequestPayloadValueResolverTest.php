@@ -937,7 +937,7 @@ class RequestPayloadValueResolverTest extends TestCase
         $argument = new ArgumentMetadata('filtered', QueryPayload::class, false, false, null, false, [
             MapQueryString::class => new MapQueryString(key: 'value'),
         ]);
-        $request = Request::create('/', Request::METHOD_GET, ['value' => ['page' => 1.0]]);
+        $request = Request::create('/', 'GET', ['value' => ['page' => 1.0]]);
 
         $kernel = $this->createMock(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
