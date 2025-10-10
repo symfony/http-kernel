@@ -180,10 +180,16 @@ EOF;
      */
     protected function filterResponse(object $response): DomResponse
     {
-        // this is needed to support StreamedResponse
-        ob_start();
-        $response->sendContent();
-        $content = ob_get_clean();
+        $content = '';
+        ob_start(static function ($chunk) use (&$content) {
+            $content .= $chunk;
+        });
+
+        try {
+            $response->sendContent();
+        } finally {
+            ob_end_clean();
+        }
 
         return new DomResponse($content, $response->getStatusCode(), $response->headers->all());
     }
