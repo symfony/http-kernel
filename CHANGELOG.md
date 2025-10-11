@@ -10,6 +10,7 @@ CHANGELOG
  * Add `#[IsSignatureValid]` attribute to validate URI signatures
  * Make `Profile` final and `Profiler::__sleep()` internal
  * Collect the application runner class
+ * Allow configuring `DumpListener` to use a different dumper when CLI profiling is enabled
 
 7.3
 ---
