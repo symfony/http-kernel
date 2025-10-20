@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\HttpKernel;
 
-use Symfony\Component\Config\Builder\ConfigBuilderGenerator;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
@@ -690,7 +689,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
         $resolver = new LoaderResolver([
             new YamlFileLoader($container, $locator, $env),
             new IniFileLoader($container, $locator, $env),
-            class_exists(XmlFileLoader::class, false) && class_exists(ConfigBuilderGenerator::class) ? new PhpFileLoader($container, $locator, $env, new ConfigBuilderGenerator($this->getBuildDir())) : new PhpFileLoader($container, $locator, $env),
+            new PhpFileLoader($container, $locator, $env),
             new GlobFileLoader($container, $locator, $env),
             new DirectoryLoader($container, $locator, $env),
             new ClosureLoader($container, $env),
