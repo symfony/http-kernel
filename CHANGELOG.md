@@ -11,6 +11,7 @@ CHANGELOG
  * Add argument `$logChannel` to `ErrorListener::logException()`
  * Add argument `$event` to `DumpListener::configure()`
  * Replace `__sleep/wakeup()` by `__(un)serialize()` on kernels and data collectors
+ * Add method `getShareDir()` to `KernelInterface`
 
 7.4
 ---
