@@ -303,7 +303,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
         return $this->getCacheDir();
     }
 
-    public function getShareDir(): string
+    public function getShareDir(): ?string
     {
         // Returns $this->getCacheDir() for backward compatibility
         return $this->getCacheDir();
@@ -586,13 +586,12 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             'kernel.debug' => $this->debug,
             'kernel.build_dir' => realpath($dir = $this->warmupDir ?: $this->getBuildDir()) ?: $dir,
             'kernel.cache_dir' => realpath($dir = ($this->getCacheDir() === $this->getBuildDir() ? ($this->warmupDir ?: $this->getCacheDir()) : $this->getCacheDir())) ?: $dir,
-            'kernel.share_dir' => realpath($dir = $this->getShareDir()) ?: $dir,
             'kernel.logs_dir' => realpath($dir = $this->getLogDir()) ?: $dir,
             'kernel.bundles' => $bundles,
             'kernel.bundles_metadata' => $bundlesMetadata,
             'kernel.charset' => $this->getCharset(),
             'kernel.container_class' => $this->getContainerClass(),
-        ];
+        ] + (null !== ($dir = $this->getShareDir()) ? ['kernel.share_dir' => realpath($dir) ?: $dir] : []);
     }
 
     /**

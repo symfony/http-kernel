@@ -20,9 +20,9 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
  *
  * It manages an environment made of application kernel and bundles.
  *
- * @method string getShareDir() Returns the share directory - not implementing it is deprecated since Symfony 7.4.
- *                              This directory should be used to store data that is shared between all front-end servers.
- *                              This typically fits application caches.
+ * @method string|null getShareDir() Returns the share directory - not implementing it is deprecated since Symfony 7.4.
+ *                                   This directory should be used to store data that is shared between all front-end servers; this typically fits application caches.
+ *                                   `null` should be returned if the application shall not use a share directory.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
