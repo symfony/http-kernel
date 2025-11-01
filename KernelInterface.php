@@ -129,7 +129,7 @@ interface KernelInterface extends HttpKernelInterface
      * This directory should be used to store data that is shared between all front-end servers.
      * This typically fits application caches.
      */
-    public function getShareDir(): string;
+    public function getShareDir(): ?string;
 
     /**
      * Gets the log directory.
