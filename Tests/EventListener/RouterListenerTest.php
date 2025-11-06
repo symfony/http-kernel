@@ -203,7 +203,8 @@ class RouterListenerTest extends TestCase
     {
         $this->expectException(BadRequestHttpException::class);
         $kernel = $this->createMock(HttpKernelInterface::class);
-        $request = Request::create('http://bad host %22/');
+        $request = Request::create('/');
+        $request->headers->set('host', 'bad host %22');
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
 
         $requestMatcher = $this->createMock(RequestMatcherInterface::class);
