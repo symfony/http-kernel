@@ -183,6 +183,8 @@ EOF;
         $content = '';
         ob_start(static function ($chunk) use (&$content) {
             $content .= $chunk;
+
+             return '';
         });
 
         try {
