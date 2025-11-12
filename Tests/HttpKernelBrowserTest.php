@@ -88,6 +88,19 @@ class HttpKernelBrowserTest extends TestCase
         $this->assertEquals('foo', $domResponse->getContent());
     }
 
+    public function testFilterResponseSupportsStreamedResponsesWithChunks()
+    {
+        $client = new HttpKernelBrowser(new TestHttpKernel());
+
+        $r = new \ReflectionObject($client);
+        $m = $r->getMethod('filterResponse');
+
+        $response = new StreamedResponse(new \ArrayIterator(['foo']));
+
+        $domResponse = $m->invoke($client, $response);
+        $this->assertEquals('foo', $domResponse->getContent());
+    }
+
     public function testUploadedFile()
     {
         $source = tempnam(sys_get_temp_dir(), 'source');
