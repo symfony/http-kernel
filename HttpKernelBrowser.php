@@ -183,6 +183,8 @@ class HttpKernelBrowser extends AbstractBrowser
         $content = '';
         ob_start(static function ($chunk) use (&$content) {
             $content .= $chunk;
+
+             return '';
         });
 
         try {
