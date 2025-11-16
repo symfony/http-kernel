@@ -52,6 +52,7 @@
         "psr/log-implementation": "1.0|2.0|3.0"
     },
     "conflict": {
+        "symfony/flex": "<2.10",
         "symfony/http-client-contracts": "<2.5",
         "symfony/translation-contracts": "<2.5",
         "twig/twig": "<3.21"
