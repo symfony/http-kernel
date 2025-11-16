@@ -60,6 +60,7 @@
         "symfony/form": "<6.4",
         "symfony/dependency-injection": "<6.4",
         "symfony/doctrine-bridge": "<6.4",
+        "symfony/flex": "<2.10",
         "symfony/http-client": "<6.4",
         "symfony/http-client-contracts": "<2.5",
         "symfony/mailer": "<6.4",
