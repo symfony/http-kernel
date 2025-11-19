@@ -14,6 +14,7 @@ CHANGELOG
  * Allow using closures with the `Cache` attribute
  * Allow setting a condition when the `Cache` attribute should be applied
  * Deprecate passing a non-flat list of attributes to `Controller::setController()`
+ * Deprecate the `Symfony\Component\HttpKernel\DependencyInjection\Extension` class, use the parent `Symfony\Component\DependencyInjection\Extension\Extension` class instead
 
 8.0
 ---

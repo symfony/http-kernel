@@ -13,12 +13,14 @@ namespace Symfony\Component\HttpKernel\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\Extension\Extension as BaseExtension;
 
+trigger_deprecation('symfony/http-kernel', '8.1', 'The "%s" class is deprecated, use "%s" instead.', Extension::class, BaseExtension::class);
+
 /**
  * Allow adding classes to the class cache.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  *
- * @internal to be deprecated in 8.1; use Symfony\Component\DependencyInjection\Extension\Extension instead
+ * @deprecated since Symfony 8.1; use Symfony\Component\DependencyInjection\Extension\Extension instead
  */
 abstract class Extension extends BaseExtension
 {
