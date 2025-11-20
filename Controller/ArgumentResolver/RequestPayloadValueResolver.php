@@ -212,7 +212,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         if (\is_array($data)) {
-            return $this->serializer->denormalize($data, $type, 'csv', $attribute->serializationContext + self::CONTEXT_DENORMALIZE);
+            return $this->serializer->denormalize($data, $type, 'csv', $attribute->serializationContext + self::CONTEXT_DENORMALIZE + ('form' === $format ? ['filter_bool' => true] : []));
         }
 
         if ('form' === $format) {
