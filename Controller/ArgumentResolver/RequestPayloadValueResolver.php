@@ -193,6 +193,10 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
 
     private function mapRequestPayload(Request $request, ArgumentMetadata $argument, MapRequestPayload $attribute): object|array|null
     {
+        if ('' === ($data = $request->request->all() ?: $request->getContent()) && ($argument->isNullable() || $argument->hasDefaultValue())) {
+            return null;
+        }
+
         if (null === $format = $request->getContentTypeFormat()) {
             throw new UnsupportedMediaTypeHttpException('Unsupported format.');
         }
@@ -207,12 +211,8 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
             $type = $argument->getType();
         }
 
-        if ($data = $request->request->all()) {
+        if (\is_array($data)) {
             return $this->serializer->denormalize($data, $type, 'csv', $attribute->serializationContext + self::CONTEXT_DENORMALIZE + ('form' === $format ? ['filter_bool' => true] : []));
-        }
-
-        if ('' === ($data = $request->getContent()) && ($argument->isNullable() || $argument->hasDefaultValue())) {
-            return null;
         }
 
         if ('form' === $format) {

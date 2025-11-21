@@ -182,6 +182,28 @@ class RequestPayloadValueResolverTest extends TestCase
         }
     }
 
+    public function testRequestPayloadWithoutContentTypeOnNullableArgumentReturnsNull()
+    {
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->never())
+            ->method('validate');
+
+        $resolver = new RequestPayloadValueResolver(new Serializer(), $validator);
+
+        $argument = new ArgumentMetadata('valid', RequestPayload::class, false, false, null, true, [
+            MapRequestPayload::class => new MapRequestPayload(),
+        ]);
+        $request = Request::create('/', 'POST');
+
+        $kernel = $this->createMock(HttpKernelInterface::class);
+        $arguments = $resolver->resolve($request, $argument);
+        $event = new ControllerArgumentsEvent($kernel, fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+
+        $this->assertSame([null], $event->getArguments());
+    }
+
     public function testQueryNullPayloadAndNotDefaultOrNullableArgument()
     {
         $validator = $this->createMock(ValidatorInterface::class);
