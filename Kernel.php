@@ -67,6 +67,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
     private ?string $warmupDir = null;
     private int $requestStackSize = 0;
     private bool $resetServices = false;
+    private bool $handlingHttpCache = false;
 
     /**
      * @var array<string, bool>
@@ -98,6 +99,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
         $this->container = null;
         $this->requestStackSize = 0;
         $this->resetServices = false;
+        $this->handlingHttpCache = false;
     }
 
     public function boot(): void
@@ -170,13 +172,22 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             $container = $this->container ?? $this->preBoot();
 
             if ($container->has('http_cache')) {
-                return $container->get('http_cache')->handle($request, $type, $catch);
+                $this->handlingHttpCache = true;
+
+                try {
+                    return $container->get('http_cache')->handle($request, $type, $catch);
+                } finally {
+                    $this->handlingHttpCache = false;
+                    $this->resetServices = true;
+                }
             }
         }
 
         $this->boot();
         ++$this->requestStackSize;
-        $this->resetServices = true;
+        if (!$this->handlingHttpCache) {
+            $this->resetServices = true;
+        }
 
         try {
             return $this->getHttpKernel()->handle($request, $type, $catch);
