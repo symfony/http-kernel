@@ -672,6 +672,10 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             }
         }
 
+        if (null === $buildTime = filter_var($_SERVER['SOURCE_DATE_EPOCH'] ?? null, \FILTER_VALIDATE_INT, \FILTER_NULL_ON_FAILURE)) {
+            $buildTime = time();
+        }
+
         $content = $dumper->dump([
             'class' => $class,
             'base_class' => $baseClass,
@@ -680,7 +684,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             'debug' => $this->debug,
             'inline_factories' => $buildParameters['.container.dumper.inline_factories'] ?? false,
             'inline_class_loader' => $buildParameters['.container.dumper.inline_class_loader'] ?? $this->debug,
-            'build_time' => $container->hasParameter('kernel.container_build_time') ? $container->getParameter('kernel.container_build_time') : time(),
+            'build_time' => $container->hasParameter('kernel.container_build_time') ? $container->getParameter('kernel.container_build_time') : $buildTime,
             'preload_classes' => array_map('get_class', $this->bundles),
         ]);
 

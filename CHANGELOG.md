@@ -5,6 +5,7 @@ CHANGELOG
 ---
 
  * Add support for bundles as compiler pass
+ * Add support for `SOURCE_DATE_EPOCH` environment variable
 
 8.0
 ---

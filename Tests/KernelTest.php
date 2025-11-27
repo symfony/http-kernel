@@ -580,6 +580,46 @@ class KernelTest extends TestCase
         }
     }
 
+    public function testSourceDateEpoch()
+    {
+        $sourceDateEpoch = 1609459200; // 2021-01-01 00:00:00 UTC
+
+        $_SERVER['SOURCE_DATE_EPOCH'] = $sourceDateEpoch;
+
+        $kernel = new class('test', true) extends Kernel {
+            public function registerBundles(): iterable
+            {
+                return [];
+            }
+
+            public function registerContainerConfiguration(LoaderInterface $loader): void
+            {
+            }
+        };
+
+        $kernel->boot();
+        $container = $kernel->getContainer();
+
+        $this->assertSame($sourceDateEpoch, $container->getParameter('container.build_time'));
+    }
+
+    public function testSourceDateEpochWithKernelContainerBuildTime()
+    {
+        $sourceDateEpoch = 1609459200; // 2021-01-01 00:00:00 UTC
+        $kernelBuildTime = 1609545600; // 2021-01-02 00:00:00 UTC
+
+        $_SERVER['SOURCE_DATE_EPOCH'] = $sourceDateEpoch;
+
+        $kernel = new CustomProjectDirKernel(static function (ContainerBuilder $container) use ($kernelBuildTime) {
+            $container->setParameter('kernel.container_build_time', $kernelBuildTime);
+        });
+        $kernel->boot();
+        $container = $kernel->getContainer();
+
+        // kernel.container_build_time should take precedence over SOURCE_DATE_EPOCH
+        $this->assertSame($kernelBuildTime, $container->getParameter('container.build_time'));
+    }
+
     /**
      * Returns a mock for the BundleInterface.
      */
