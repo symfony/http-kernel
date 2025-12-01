@@ -19,6 +19,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -33,6 +34,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\ServicesResetter;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpKernel\Tests\Fixtures\KernelForTest;
 use Symfony\Component\HttpKernel\Tests\Fixtures\KernelForTestWithLoadClassCache;
 use Symfony\Component\HttpKernel\Tests\Fixtures\KernelWithoutBundles;
@@ -598,6 +600,39 @@ EOF
         $this->assertEquals(1, ResettableService::$counter);
     }
 
+    public function testServicesAreNotResetBetweenHttpCacheFragments()
+    {
+        ResettableService::$counter = 0;
+        $fragmentKernel = new FragmentHandlingKernel();
+
+        $kernel = new CustomProjectDirKernel(function (ContainerBuilder $container) {
+            $container->addCompilerPass(new ResettableServicePass());
+            $container->register('kernel', CustomProjectDirKernel::class)
+                ->setSynthetic(true)
+                ->setPublic(true);
+            $container->register('one', ResettableService::class)
+                ->setPublic(true)
+                ->addTag('kernel.reset', ['method' => 'reset']);
+            $container->register('services_resetter', ServicesResetter::class)->setPublic(true);
+            $container->register('http_cache', FragmentRenderingHttpCache::class)
+                ->setPublic(true)
+                ->addArgument(new Reference('kernel'));
+        }, $fragmentKernel, 'http_cache_fragments');
+
+        $kernel->handle(new Request());
+
+        $this->assertSame([
+            ['/first-fragment', HttpKernelInterface::MAIN_REQUEST],
+            ['/second-fragment', HttpKernelInterface::MAIN_REQUEST],
+        ], $fragmentKernel->handledPaths);
+        $this->assertSame([0, 0], $fragmentKernel->resetCounters);
+        $this->assertSame(0, ResettableService::$counter);
+
+        $kernel->boot();
+
+        $this->assertSame(1, ResettableService::$counter);
+    }
+
     /**
      * @group time-sensitive
      */
@@ -809,5 +844,41 @@ class PassKernel extends CustomProjectDirKernel implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         $container->setParameter('test.processed', true);
+    }
+}
+
+class FragmentHandlingKernel implements HttpKernelInterface
+{
+    public array $handledPaths = [];
+    public array $resetCounters = [];
+
+    public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = true): Response
+    {
+        $this->handledPaths[] = [$request->getPathInfo(), $type];
+        $this->resetCounters[] = ResettableService::$counter;
+
+        return new Response($request->getPathInfo());
+    }
+}
+
+class FragmentRenderingHttpCache implements HttpKernelInterface
+{
+    public function __construct(
+        private KernelInterface $kernel,
+        private string $trackedServiceId = 'one',
+    ) {
+    }
+
+    public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = true): Response
+    {
+        $this->kernel->boot();
+        $this->kernel->getContainer()->get($this->trackedServiceId);
+
+        $responses = [];
+        foreach (['/first-fragment', '/second-fragment'] as $path) {
+            $responses[] = $this->kernel->handle(Request::create($path), self::MAIN_REQUEST, $catch);
+        }
+
+        return new Response(implode('', array_map(static fn (Response $response) => $response->getContent(), $responses)));
     }
 }
