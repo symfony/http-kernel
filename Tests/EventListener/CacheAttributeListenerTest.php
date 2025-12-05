@@ -383,6 +383,30 @@ class CacheAttributeListenerTest extends TestCase
         $this->assertSame($expectedVary, $response->getVary());
     }
 
+    public function testAttributeRespectsExplicitPrivateFromController()
+    {
+        $request = $this->createRequest(new Cache(public: true));
+        $response = new Response();
+        $response->setPrivate();
+
+        $this->listener->onKernelResponse($this->createEventMock($request, $response));
+
+        $this->assertTrue($response->headers->hasCacheControlDirective('private'));
+        $this->assertFalse($response->headers->hasCacheControlDirective('public'));
+    }
+
+    public function testAttributeRespectsExplicitPublicFromController()
+    {
+        $request = $this->createRequest(new Cache(public: false));
+        $response = new Response();
+        $response->setPublic();
+
+        $this->listener->onKernelResponse($this->createEventMock($request, $response));
+
+        $this->assertTrue($response->headers->hasCacheControlDirective('public'));
+        $this->assertFalse($response->headers->hasCacheControlDirective('private'));
+    }
+
     public static function provideVaryHeaderScenarios(): \Traversable
     {
         yield 'no vary headers at all' => [
