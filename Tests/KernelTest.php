@@ -106,7 +106,7 @@ class KernelTest extends TestCase
         $this->assertFileExists($containerDir);
         $this->assertFileDoesNotExist($containerDir.'.legacy');
 
-        $kernel = new CustomProjectDirKernel(function ($container) { $container->register('foo', 'stdClass')->setPublic(true); });
+        $kernel = new CustomProjectDirKernel(static function ($container) { $container->register('foo', 'stdClass')->setPublic(true); });
         $kernel->boot();
 
         $this->assertFileExists($containerDir);
@@ -403,7 +403,7 @@ class KernelTest extends TestCase
         $this->assertFileExists($containerFile);
         unlink(__DIR__.'/Fixtures/var/cache/custom/Symfony_Component_HttpKernel_Tests_CustomProjectDirKernelCustomDebugContainer.php.meta');
 
-        $kernel = new CustomProjectDirKernel(function ($container) { $container->register('foo', 'stdClass')->setPublic(true); });
+        $kernel = new CustomProjectDirKernel(static function ($container) { $container->register('foo', 'stdClass')->setPublic(true); });
         $kernel->boot();
 
         $this->assertNotInstanceOf($containerClass, $kernel->getContainer());
@@ -471,7 +471,7 @@ class KernelTest extends TestCase
             ->expects($this->exactly(2))
             ->method('handle');
 
-        $kernel = new CustomProjectDirKernel(function ($container) {
+        $kernel = new CustomProjectDirKernel(static function ($container) {
             $container->addCompilerPass(new ResettableServicePass());
             $container->register('one', ResettableService::class)
                 ->setPublic(true)
@@ -499,7 +499,7 @@ class KernelTest extends TestCase
         ResettableService::$counter = 0;
         $fragmentKernel = new FragmentHandlingKernel();
 
-        $kernel = new CustomProjectDirKernel(function (ContainerBuilder $container) {
+        $kernel = new CustomProjectDirKernel(static function (ContainerBuilder $container) {
             $container->addCompilerPass(new ResettableServicePass());
             $container->register('kernel', CustomProjectDirKernel::class)
                 ->setSynthetic(true)
@@ -563,7 +563,7 @@ class KernelTest extends TestCase
 
     public function testTrustedParameters()
     {
-        $kernel = new CustomProjectDirKernel(function (ContainerBuilder $container) {
+        $kernel = new CustomProjectDirKernel(static function (ContainerBuilder $container) {
             $container->setParameter('kernel.trusted_hosts', '^a{2,3}.com$, ^b{2,}.com$');
             $container->setParameter('kernel.trusted_proxies', 'a,b');
             $container->setParameter('kernel.trusted_headers', 'x-forwarded-for');

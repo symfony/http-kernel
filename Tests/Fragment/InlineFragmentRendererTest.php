@@ -101,7 +101,7 @@ class InlineFragmentRendererTest extends TestCase
 
     public function testRenderExceptionIgnoreErrorsWithAlt()
     {
-        $strategy = new InlineFragmentRenderer($this->getKernel(function () {
+        $strategy = new InlineFragmentRenderer($this->getKernel(static function () {
             static $firstCall = true;
 
             if ($firstCall) {
@@ -141,7 +141,7 @@ class InlineFragmentRendererTest extends TestCase
         $controllerResolver
             ->expects($this->once())
             ->method('getController')
-            ->willReturn(function () {
+            ->willReturn(static function () {
                 ob_start();
                 echo 'bar';
                 throw new \RuntimeException();
@@ -310,7 +310,7 @@ class InlineFragmentRendererTest extends TestCase
         $kernel
             ->expects($this->once())
             ->method('handle')
-            ->with($this->callback(function (Request $request) use ($expectedRequest) {
+            ->with($this->callback(static function (Request $request) use ($expectedRequest) {
                 $expectedRequest->server->remove('REQUEST_TIME_FLOAT');
                 $request->server->remove('REQUEST_TIME_FLOAT');
 

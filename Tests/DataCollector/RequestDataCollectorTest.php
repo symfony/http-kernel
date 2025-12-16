@@ -114,7 +114,7 @@ class RequestDataCollectorTest extends TestCase
 
             [
                 'Closure',
-                fn () => 'foo',
+                static fn () => 'foo',
                 [
                     'class' => \sprintf('{closure:%s():%d}', __METHOD__, __LINE__ - 2),
                     'method' => null,
