@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+8.1
+---
+
+ * Add support for bundles as compiler pass
+
 8.0
 ---
 

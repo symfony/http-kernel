@@ -616,6 +616,10 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             if ($this->debug) {
                 $container->addObjectResource($bundle);
             }
+
+            if ($bundle instanceof CompilerPassInterface) {
+                $container->addCompilerPass($bundle, PassConfig::TYPE_BEFORE_OPTIMIZATION, -10000);
+            }
         }
 
         foreach ($this->bundles as $bundle) {
