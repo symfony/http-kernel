@@ -84,6 +84,6 @@ class RouterDataCollectorTest extends TestCase
     {
         $kernel = $this->createMock(KernelInterface::class);
 
-        return new ControllerEvent($kernel, function () {}, $request, null);
+        return new ControllerEvent($kernel, static function () {}, $request, null);
     }
 }
