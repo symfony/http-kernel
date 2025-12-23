@@ -14,6 +14,7 @@ namespace Symfony\Component\HttpKernel\Tests\Event;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Tests\Fixtures\Attribute\Bar;
@@ -60,6 +61,52 @@ class ControllerEventTest extends TestCase
         $event = new ControllerEvent(new TestHttpKernel(), $controller, new Request(), HttpKernelInterface::MAIN_REQUEST);
 
         $this->assertEquals([], $event->getAttributes(\stdClass::class));
+    }
+
+    public function testControllerAttributesAreStoredInRequestAttributes()
+    {
+        $request = new Request();
+        $controller = [new AttributeController(), '__invoke'];
+        $event = new ControllerEvent(new TestHttpKernel(), $controller, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        // Initially, no controller attributes should be in request
+        $this->assertFalse($request->attributes->has('_controller_attributes'));
+
+        // After calling getAttributes(), they should be stored in request attributes
+        $attributes = $event->getAttributes();
+
+        $this->assertTrue($request->attributes->has('_controller_attributes'));
+        $this->assertEquals($attributes, $request->attributes->get('_controller_attributes'));
+    }
+
+    public function testSetControllerWithAttributesStoresInRequest()
+    {
+        $request = new Request();
+        $controller = [new AttributeController(), '__invoke'];
+        $event = new ControllerEvent(new TestHttpKernel(), $controller, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $customAttributes = [Bar::class => [new Bar('custom')]];
+
+        $event->setController($controller, $customAttributes);
+
+        $this->assertEquals($customAttributes, $request->attributes->get('_controller_attributes'));
+    }
+
+    public function testSetControllerWithoutAttributesRemovesFromRequestWhenControllerChanges()
+    {
+        $request = new Request();
+        $controller1 = [new AttributeController(), '__invoke'];
+        $controller2 = static fn () => new Response('test');
+        $event = new ControllerEvent(new TestHttpKernel(), $controller1, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        // First set some attributes
+        $customAttributes = [Bar::class => [new Bar('custom')]];
+        $event->setController($controller1, $customAttributes);
+        $this->assertEquals($customAttributes, $request->attributes->get('_controller_attributes'));
+
+        // Then set different controller without attributes - should remove attributes
+        $event->setController($controller2);
+        $this->assertFalse($request->attributes->has('_controller_attributes'));
     }
 
     public static function provideGetAttributes()

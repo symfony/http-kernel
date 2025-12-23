@@ -167,7 +167,7 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
             throw new NotFoundHttpException(\sprintf('Unable to find the controller for path "%s". The route is wrongly configured.', $request->getPathInfo()));
         }
 
-        $event = new ControllerEvent($this, $controller, $request, $type);
+        $controllerEvent = $event = new ControllerEvent($this, $controller, $request, $type);
         $this->dispatcher->dispatch($event, KernelEvents::CONTROLLER);
         $controller = $event->getController();
 
@@ -201,7 +201,7 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
             }
         }
 
-        return $this->filterResponse($response, $request, $type);
+        return $this->filterResponse($response, $request, $type, $controllerEvent);
     }
 
     /**
@@ -209,9 +209,9 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
      *
      * @throws \RuntimeException if the passed object is not a Response instance
      */
-    private function filterResponse(Response $response, Request $request, int $type): Response
+    private function filterResponse(Response $response, Request $request, int $type, ?ControllerEvent $controllerEvent = null): Response
     {
-        $event = new ResponseEvent($this, $request, $type, $response);
+        $event = new ResponseEvent($this, $request, $type, $response, $controllerEvent);
 
         $this->dispatcher->dispatch($event, KernelEvents::RESPONSE);
 

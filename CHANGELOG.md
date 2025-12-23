@@ -6,6 +6,8 @@ CHANGELOG
 
  * Add support for bundles as compiler pass
  * Add support for `SOURCE_DATE_EPOCH` environment variable
+ * Add `ResponseEvent::getControllerAttributes()`
+ * Add `Request` attribute `_controller_attributes` to decouple controller attributes from their source code
 
 8.0
 ---

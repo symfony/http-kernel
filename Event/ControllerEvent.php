@@ -29,7 +29,6 @@ final class ControllerEvent extends KernelEvent
 {
     private string|array|object $controller;
     private \ReflectionFunctionAbstract $controllerReflector;
-    private array $attributes;
 
     public function __construct(HttpKernelInterface $kernel, callable $controller, Request $request, ?int $requestType)
     {
@@ -54,7 +53,7 @@ final class ControllerEvent extends KernelEvent
     public function setController(callable $controller, ?array $attributes = null): void
     {
         if (null !== $attributes) {
-            $this->attributes = $attributes;
+            $this->getRequest()->attributes->set('_controller_attributes', $attributes);
         }
 
         if (isset($this->controller) && ($controller instanceof \Closure ? $controller == $this->controller : $controller === $this->controller)) {
@@ -64,7 +63,7 @@ final class ControllerEvent extends KernelEvent
         }
 
         if (null === $attributes) {
-            unset($this->attributes);
+            $this->getRequest()->attributes->remove('_controller_attributes');
         }
 
         if (\is_array($controller) && method_exists(...$controller)) {
@@ -87,8 +86,8 @@ final class ControllerEvent extends KernelEvent
      */
     public function getAttributes(?string $className = null): array
     {
-        if (isset($this->attributes)) {
-            return null === $className ? $this->attributes : $this->attributes[$className] ?? [];
+        if (null !== $attributes = $this->getRequest()->attributes->get('_controller_attributes')) {
+            return null === $className ? $attributes : $attributes[$className] ?? [];
         }
 
         if (\is_array($this->controller) && method_exists(...$this->controller)) {
@@ -98,14 +97,16 @@ final class ControllerEvent extends KernelEvent
         } else {
             $class = $this->controllerReflector instanceof \ReflectionFunction && $this->controllerReflector->isAnonymous() ? null : $this->controllerReflector->getClosureCalledClass();
         }
-        $this->attributes = [];
+        $attributes = [];
 
         foreach (array_merge($class?->getAttributes() ?? [], $this->controllerReflector->getAttributes()) as $attribute) {
             if (class_exists($attribute->getName())) {
-                $this->attributes[$attribute->getName()][] = $attribute->newInstance();
+                $attributes[$attribute->getName()][] = $attribute->newInstance();
             }
         }
 
-        return null === $className ? $this->attributes : $this->attributes[$className] ?? [];
+        $this->getRequest()->attributes->set('_controller_attributes', $attributes);
+
+        return null === $className ? $attributes : $attributes[$className] ?? [];
     }
 }
