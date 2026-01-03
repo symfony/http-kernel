@@ -212,6 +212,8 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         if (\is_array($data)) {
+            $data = $this->mergeParamsAndFiles($data, $request->files->all());
+
             return $this->serializer->denormalize($data, $type, 'csv', $attribute->serializationContext + self::CONTEXT_DENORMALIZE + ('form' === $format ? ['filter_bool' => true] : []));
         }
 
@@ -237,5 +239,27 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         return $files ?? ('array' === $argument->getType() ? [] : null);
+    }
+
+    private function mergeParamsAndFiles(array $params, array $files): array
+    {
+        $isFilesList = array_is_list($files);
+
+        foreach ($params as $key => $value) {
+            if (\is_array($value) && \is_array($files[$key] ?? null)) {
+                $params[$key] = $this->mergeParamsAndFiles($value, $files[$key]);
+                unset($files[$key]);
+            }
+        }
+
+        if (!$isFilesList) {
+            return array_replace($params, $files);
+        }
+
+        foreach ($files as $value) {
+            $params[] = $value;
+        }
+
+        return $params;
     }
 }
