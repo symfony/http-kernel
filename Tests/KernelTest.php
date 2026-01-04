@@ -19,9 +19,9 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -633,6 +633,29 @@ EOF
         $this->assertSame(1, ResettableService::$counter);
     }
 
+    public function testHttpCacheHandlesRequestsAfterKernelBoot()
+    {
+        $kernel = new CustomProjectDirKernel(static function (ContainerBuilder $container) {
+            $container->register('http_cache', RecordingHttpCache::class)
+                ->setPublic(true);
+        }, new ThrowingHttpKernel(), 'http_cache_worker');
+
+        $kernel->boot();
+
+        $firstResponse = $kernel->handle(Request::create('/worker-first'));
+        $secondResponse = $kernel->handle(Request::create('/worker-second'));
+
+        /** @var RecordingHttpCache $httpCache */
+        $httpCache = $kernel->getContainer()->get('http_cache');
+
+        $this->assertSame([
+            ['/worker-first', HttpKernelInterface::MAIN_REQUEST],
+            ['/worker-second', HttpKernelInterface::MAIN_REQUEST],
+        ], $httpCache->handledPaths);
+        $this->assertSame('cached: /worker-first', $firstResponse->getContent());
+        $this->assertSame('cached: /worker-second', $secondResponse->getContent());
+    }
+
     /**
      * @group time-sensitive
      */
@@ -880,5 +903,25 @@ class FragmentRenderingHttpCache implements HttpKernelInterface
         }
 
         return new Response(implode('', array_map(static fn (Response $response) => $response->getContent(), $responses)));
+    }
+}
+
+class RecordingHttpCache implements HttpKernelInterface
+{
+    public array $handledPaths = [];
+
+    public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = true): Response
+    {
+        $this->handledPaths[] = [$request->getPathInfo(), $type];
+
+        return new Response('cached: '.$request->getPathInfo());
+    }
+}
+
+class ThrowingHttpKernel implements HttpKernelInterface
+{
+    public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = true): Response
+    {
+        throw new \LogicException('The worker HTTP kernel should not be reached when the http_cache service handles the request.');
     }
 }
