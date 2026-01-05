@@ -60,16 +60,17 @@ class CacheAttributeListener implements EventSubscriberInterface
         $response = null;
         $lastModified = null;
         $etag = null;
+        $variables = null;
 
         /** @var Cache[] $attributes */
         foreach ($attributes as $cache) {
             if (null !== $cache->lastModified) {
-                $lastModified = $this->getExpressionLanguage()->evaluate($cache->lastModified, array_merge($request->attributes->all(), $event->getNamedArguments()));
+                $lastModified = $this->getExpressionLanguage()->evaluate($cache->lastModified, $variables ??= $this->getVariables($request, $event));
                 ($response ??= new Response())->setLastModified($lastModified);
             }
 
             if (null !== $cache->etag) {
-                $etag = hash('sha256', $this->getExpressionLanguage()->evaluate($cache->etag, array_merge($request->attributes->all(), $event->getNamedArguments())));
+                $etag = hash('sha256', $this->getExpressionLanguage()->evaluate($cache->etag, $variables ??= $this->getVariables($request, $event)));
                 ($response ??= new Response())->setEtag($etag);
             }
         }
@@ -202,6 +203,14 @@ class CacheAttributeListener implements EventSubscriberInterface
     {
         $this->lastModified = new \SplObjectStorage();
         $this->etags = new \SplObjectStorage();
+    }
+
+    private function getVariables(Request $request, ControllerArgumentsEvent $event): array
+    {
+        return array_merge([
+            'request' => $request,
+            'args' => $arguments = $event->getNamedArguments(),
+        ], $request->attributes->all(), $arguments);
     }
 
     private function getExpressionLanguage(): ExpressionLanguage

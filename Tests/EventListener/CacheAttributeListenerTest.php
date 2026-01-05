@@ -13,7 +13,7 @@ namespace Symfony\Component\HttpKernel\Tests\EventListener;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -221,6 +221,8 @@ class CacheAttributeListenerTest extends TestCase
 
     #[TestWith(['test.getDate()'])]
     #[TestWith(['date'])]
+    #[TestWith(['args["test"].getDate()'])]
+    #[TestWith(['request.attributes.get("date")'])]
     public function testLastModifiedNotModifiedResponse(string $expression)
     {
         $entity = new TestEntity();
@@ -240,6 +242,8 @@ class CacheAttributeListenerTest extends TestCase
 
     #[TestWith(['test.getDate()'])]
     #[TestWith(['date'])]
+    #[TestWith(['args["test"].getDate()'])]
+    #[TestWith(['request.attributes.get("date")'])]
     public function testLastModifiedHeader(string $expression)
     {
         $entity = new TestEntity();
@@ -264,6 +268,8 @@ class CacheAttributeListenerTest extends TestCase
 
     #[TestWith(['test.getId()'])]
     #[TestWith(['id'])]
+    #[TestWith(['args["test"].getId()'])]
+    #[TestWith(['request.attributes.get("id")'])]
     public function testEtagNotModifiedResponse(string $expression)
     {
         $entity = new TestEntity();
@@ -283,6 +289,8 @@ class CacheAttributeListenerTest extends TestCase
 
     #[TestWith(['test.getId()'])]
     #[TestWith(['id'])]
+    #[TestWith(['args["test"].getId()'])]
+    #[TestWith(['request.attributes.get("id")'])]
     public function testEtagHeader(string $expression)
     {
         $entity = new TestEntity();
@@ -455,9 +463,9 @@ class CacheAttributeListenerTest extends TestCase
         return new ResponseEvent($this->getKernel(), $request, HttpKernelInterface::MAIN_REQUEST, $response);
     }
 
-    private function getKernel(): MockObject&HttpKernelInterface
+    private function getKernel(): Stub&HttpKernelInterface
     {
-        return $this->createMock(HttpKernelInterface::class);
+        return $this->createStub(HttpKernelInterface::class);
     }
 }
 
