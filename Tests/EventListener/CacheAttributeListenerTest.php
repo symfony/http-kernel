@@ -500,9 +500,75 @@ class CacheAttributeListenerTest extends TestCase
         ];
     }
 
-    private function createRequest(Cache $cache): Request
+    #[DataProvider('provideCacheIfCases')]
+    public function testCacheAppliedOnlyWhenIfEvaluatesToTrue(string|\Closure $if1, string|\Closure $if2, bool $sMaxAge, bool $public, bool $maxAge, bool $private)
     {
-        return new Request([], [], ['_cache' => [$cache]]);
+        $entity = new TestEntity();
+
+        $request = $this->createRequest(
+            new Cache(smaxage: '1 days', public: true, if: $if1),
+            new Cache(maxage: '10 days', public: false, if: $if2),
+        );
+
+        $listener = new CacheAttributeListener();
+        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), static fn (TestEntity $test) => new Response(), [$entity], $request, null);
+        $listener->onKernelControllerArguments($controllerArgumentsEvent);
+
+        $controllerResponse = $controllerArgumentsEvent->getController()($entity);
+        $responseEvent = new ResponseEvent($this->getKernel(), $request, HttpKernelInterface::MAIN_REQUEST, $controllerResponse);
+        $listener->onKernelResponse($responseEvent);
+
+        $response = $responseEvent->getResponse();
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        $this->assertSame($sMaxAge, $response->headers->hasCacheControlDirective('s-maxage'));
+        $this->assertSame($public, $response->headers->hasCacheControlDirective('public'));
+        $this->assertSame($maxAge, $response->headers->hasCacheControlDirective('max-age'));
+        $this->assertSame($private, $response->headers->hasCacheControlDirective('private'));
+    }
+
+    public static function provideCacheIfCases(): iterable
+    {
+        yield 'expression' => [
+            'args["test"].getId() <= 0',
+            'args["test"].getId() > 0',
+            false,
+            false,
+            true,
+            true,
+        ];
+
+        yield 'closure' => [
+            static fn (array $arguments, Request $request) => $arguments['test']->getDate() <= new \DateTimeImmutable(),
+            static fn (array $arguments, Request $request) => $arguments['test']->getDate() > new \DateTimeImmutable(),
+            true,
+            true,
+            false,
+            false,
+        ];
+    }
+
+    public function testErrorIsThrownWhenIfEvaluatesToNonBool()
+    {
+        $entity = new TestEntity();
+
+        $request = $this->createRequest(
+            new Cache(smaxage: '1 days', public: true, if: static fn (array $arguments, Request $request) => 'foo'),
+        );
+
+        $listener = new CacheAttributeListener();
+        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), static fn (TestEntity $test) => new Response(), [$entity], $request, null);
+
+        $this->expectException(\TypeError::class);
+        $this->expectExceptionMessage(\sprintf('The value of the "$if" option of the "%s" attribute must evaluate to a boolean, "string" given.', Cache::class));
+
+        $listener->onKernelControllerArguments($controllerArgumentsEvent);
+    }
+
+    private function createRequest(Cache ...$cache): Request
+    {
+        return new Request([], [], ['_cache' => $cache]);
     }
 
     private function createEventMock(Request $request, Response $response): ResponseEvent
