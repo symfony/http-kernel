@@ -67,6 +67,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
     private ?string $warmupDir = null;
     private int $requestStackSize = 0;
     private bool $resetServices = false;
+    private bool $handlingHttpCache = false;
 
     /**
      * @var array<string, bool>
@@ -98,11 +99,12 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
         $this->container = null;
         $this->requestStackSize = 0;
         $this->resetServices = false;
+        $this->handlingHttpCache = false;
     }
 
     public function boot(): void
     {
-        if (true === $this->booted) {
+        if ($this->booted) {
             if (!$this->requestStackSize && $this->resetServices) {
                 if ($this->container->has('services_resetter')) {
                     $this->container->get('services_resetter')->reset();
@@ -116,7 +118,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             return;
         }
 
-        if (null === $this->container) {
+        if (!$this->container) {
             $this->preBoot();
         }
 
@@ -137,7 +139,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
 
     public function terminate(Request $request, Response $response): void
     {
-        if (false === $this->booted) {
+        if (!$this->booted) {
             return;
         }
 
@@ -148,7 +150,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
 
     public function shutdown(): void
     {
-        if (false === $this->booted) {
+        if (!$this->booted) {
             return;
         }
 
@@ -166,17 +168,26 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
 
     public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
     {
-        if (!$this->booted) {
-            $container = $this->container ?? $this->preBoot();
+        if (!$this->container) {
+            $this->preBoot();
+        }
 
-            if ($container->has('http_cache')) {
-                return $container->get('http_cache')->handle($request, $type, $catch);
+        if (HttpKernelInterface::MAIN_REQUEST === $type && !$this->handlingHttpCache && $this->container->has('http_cache')) {
+            $this->handlingHttpCache = true;
+
+            try {
+                return $this->container->get('http_cache')->handle($request, $type, $catch);
+            } finally {
+                $this->handlingHttpCache = false;
+                $this->resetServices = true;
             }
         }
 
         $this->boot();
         ++$this->requestStackSize;
-        $this->resetServices = true;
+        if (!$this->handlingHttpCache) {
+            $this->resetServices = true;
+        }
 
         try {
             return $this->getHttpKernel()->handle($request, $type, $catch);
@@ -597,7 +608,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
     {
         foreach (['cache' => $this->getCacheDir(), 'build' => $this->warmupDir ?: $this->getBuildDir()] as $name => $dir) {
             if (!is_dir($dir)) {
-                if (false === @mkdir($dir, 0777, true) && !is_dir($dir)) {
+                if (!@mkdir($dir, 0o777, true) && !is_dir($dir)) {
                     throw new \RuntimeException(\sprintf('Unable to create the "%s" directory (%s).', $name, $dir));
                 }
             } elseif (!is_writable($dir)) {

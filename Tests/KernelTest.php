@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +30,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\ServicesResetter;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpKernel\Tests\Fixtures\KernelWithoutBundles;
 use Symfony\Component\HttpKernel\Tests\Fixtures\ResettableService;
 
@@ -485,6 +487,62 @@ class KernelTest extends TestCase
         $this->assertEquals(1, ResettableService::$counter);
     }
 
+    public function testServicesAreNotResetBetweenHttpCacheFragments()
+    {
+        ResettableService::$counter = 0;
+        $fragmentKernel = new FragmentHandlingKernel();
+
+        $kernel = new CustomProjectDirKernel(function (ContainerBuilder $container) {
+            $container->addCompilerPass(new ResettableServicePass());
+            $container->register('kernel', CustomProjectDirKernel::class)
+                ->setSynthetic(true)
+                ->setPublic(true);
+            $container->register('one', ResettableService::class)
+                ->setPublic(true)
+                ->addTag('kernel.reset', ['method' => 'reset']);
+            $container->register('services_resetter', ServicesResetter::class)->setPublic(true);
+            $container->register('http_cache', FragmentRenderingHttpCache::class)
+                ->setPublic(true)
+                ->addArgument(new Reference('kernel'));
+        }, $fragmentKernel, 'http_cache_fragments');
+
+        $kernel->handle(new Request());
+
+        $this->assertSame([
+            ['/first-fragment', HttpKernelInterface::MAIN_REQUEST],
+            ['/second-fragment', HttpKernelInterface::MAIN_REQUEST],
+        ], $fragmentKernel->handledPaths);
+        $this->assertSame([0, 0], $fragmentKernel->resetCounters);
+        $this->assertSame(0, ResettableService::$counter);
+
+        $kernel->boot();
+
+        $this->assertSame(1, ResettableService::$counter);
+    }
+
+    public function testHttpCacheHandlesRequestsAfterKernelBoot()
+    {
+        $kernel = new CustomProjectDirKernel(static function (ContainerBuilder $container) {
+            $container->register('http_cache', RecordingHttpCache::class)
+                ->setPublic(true);
+        }, new ThrowingHttpKernel(), 'http_cache_worker');
+
+        $kernel->boot();
+
+        $firstResponse = $kernel->handle(Request::create('/worker-first'));
+        $secondResponse = $kernel->handle(Request::create('/worker-second'));
+
+        /** @var RecordingHttpCache $httpCache */
+        $httpCache = $kernel->getContainer()->get('http_cache');
+
+        $this->assertSame([
+            ['/worker-first', HttpKernelInterface::MAIN_REQUEST],
+            ['/worker-second', HttpKernelInterface::MAIN_REQUEST],
+        ], $httpCache->handledPaths);
+        $this->assertSame('cached: /worker-first', $firstResponse->getContent());
+        $this->assertSame('cached: /worker-second', $secondResponse->getContent());
+    }
+
     /**
      * @group time-sensitive
      */
@@ -676,6 +734,62 @@ class PassKernel extends CustomProjectDirKernel implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         $container->setParameter('test.processed', true);
+    }
+}
+
+class FragmentHandlingKernel implements HttpKernelInterface
+{
+    public array $handledPaths = [];
+    public array $resetCounters = [];
+
+    public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = true): Response
+    {
+        $this->handledPaths[] = [$request->getPathInfo(), $type];
+        $this->resetCounters[] = ResettableService::$counter;
+
+        return new Response($request->getPathInfo());
+    }
+}
+
+class FragmentRenderingHttpCache implements HttpKernelInterface
+{
+    public function __construct(
+        private KernelInterface $kernel,
+        private string $trackedServiceId = 'one',
+    ) {
+    }
+
+    public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = true): Response
+    {
+        $this->kernel->boot();
+        $this->kernel->getContainer()->get($this->trackedServiceId);
+
+        $responses = [];
+        foreach (['/first-fragment', '/second-fragment'] as $path) {
+            $responses[] = $this->kernel->handle(Request::create($path), self::MAIN_REQUEST, $catch);
+        }
+
+        return new Response(implode('', array_map(static fn (Response $response) => $response->getContent(), $responses)));
+    }
+}
+
+class RecordingHttpCache implements HttpKernelInterface
+{
+    public array $handledPaths = [];
+
+    public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = true): Response
+    {
+        $this->handledPaths[] = [$request->getPathInfo(), $type];
+
+        return new Response('cached: '.$request->getPathInfo());
+    }
+}
+
+class ThrowingHttpKernel implements HttpKernelInterface
+{
+    public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = true): Response
+    {
+        throw new \LogicException('The worker HTTP kernel should not be reached when the http_cache service handles the request.');
     }
 }
 
