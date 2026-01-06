@@ -313,6 +313,53 @@ class CacheAttributeListenerTest extends TestCase
         $this->assertStringContainsString(hash('sha256', $entity->getId()), $response->headers->get('Etag'));
     }
 
+    #[DataProvider('provideLastModifiedHeaderAndEtagClosureCases')]
+    public function testLastModifiedHeaderAndEtagHeadersClosures(\Closure $lastModifiedClosure, \Closure $etagClosure)
+    {
+        $entity = new TestEntity();
+
+        $request = $this->createRequest(new Cache(lastModified: $lastModifiedClosure, etag: $etagClosure));
+        $request->attributes->set('date', new \DateTimeImmutable('Fri, 23 Aug 2013 00:00:00 GMT'));
+        $request->attributes->set('id', '12345');
+
+        $listener = new CacheAttributeListener();
+        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), static fn (TestEntity $test) => new Response(), [$entity], $request, null);
+        $listener->onKernelControllerArguments($controllerArgumentsEvent);
+
+        $controllerResponse = $controllerArgumentsEvent->getController()($entity);
+        $responseEvent = new ResponseEvent($this->getKernel(), $request, HttpKernelInterface::MAIN_REQUEST, $controllerResponse);
+        $listener->onKernelResponse($responseEvent);
+
+        $response = $responseEvent->getResponse();
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($response->headers->has('Last-Modified'));
+        $this->assertSame('Fri, 23 Aug 2013 00:00:00 GMT', $response->headers->get('Last-Modified'));
+        $this->assertTrue($response->headers->has('Etag'));
+        $this->assertStringContainsString(hash('sha256', $entity->getId()), $response->headers->get('Etag'));
+    }
+
+    public static function provideLastModifiedHeaderAndEtagClosureCases(): iterable
+    {
+        yield 'using arguments' => [
+            static function (array $arguments, Request $request) {
+                return $arguments['test']->getDate();
+            },
+            static function (array $arguments, Request $request) {
+                return $arguments['test']->getId();
+            },
+        ];
+
+        yield 'using request attributes' => [
+            static function (array $arguments, Request $request) {
+                return $request->attributes->get('date');
+            },
+            static function (array $arguments, Request $request) {
+                return $request->attributes->get('id');
+            },
+        ];
+    }
+
     public function testConfigurationDoesNotOverrideAlreadySetResponseHeaders()
     {
         $request = $this->createRequest(new Cache(

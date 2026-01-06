@@ -12,6 +12,7 @@
 namespace Symfony\Component\HttpKernel\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\Request;
@@ -65,12 +66,12 @@ class CacheAttributeListener implements EventSubscriberInterface
         /** @var Cache[] $attributes */
         foreach ($attributes as $cache) {
             if (null !== $cache->lastModified) {
-                $lastModified = $this->getExpressionLanguage()->evaluate($cache->lastModified, $variables ??= $this->getVariables($request, $event));
+                $lastModified = $this->evaluate($cache->lastModified, $variables ??= $this->getVariables($request, $event));
                 ($response ??= new Response())->setLastModified($lastModified);
             }
 
             if (null !== $cache->etag) {
-                $etag = hash('sha256', $this->getExpressionLanguage()->evaluate($cache->etag, $variables ??= $this->getVariables($request, $event)));
+                $etag = hash('sha256', $this->evaluate($cache->etag, $variables ??= $this->getVariables($request, $event)));
                 ($response ??= new Response())->setEtag($etag);
             }
         }
@@ -203,6 +204,15 @@ class CacheAttributeListener implements EventSubscriberInterface
     {
         $this->lastModified = new \SplObjectStorage();
         $this->etags = new \SplObjectStorage();
+    }
+
+    private function evaluate(string|Expression|\Closure $closureOrExpression, array $variables): mixed
+    {
+        if ($closureOrExpression instanceof \Closure) {
+            return $closureOrExpression($variables['args'], $variables['request']);
+        }
+
+        return $this->getExpressionLanguage()->evaluate($closureOrExpression, $variables);
     }
 
     private function getVariables(Request $request, ControllerArgumentsEvent $event): array
