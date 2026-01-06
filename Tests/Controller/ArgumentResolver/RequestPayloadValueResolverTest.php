@@ -14,6 +14,7 @@ namespace Symfony\Component\HttpKernel\Tests\Controller\ArgumentResolver;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -43,6 +44,8 @@ use Symfony\Component\Validator\ValidatorBuilder;
 
 class RequestPayloadValueResolverTest extends TestCase
 {
+    private const string FIXTURES_BASE_PATH = __DIR__.'/../../Fixtures/Controller/ArgumentResolver/UploadedFile';
+
     public function testNotTypedArgument()
     {
         $resolver = new RequestPayloadValueResolver(
@@ -970,6 +973,37 @@ class RequestPayloadValueResolverTest extends TestCase
         $this->assertInstanceOf(QueryPayload::class, $event->getArguments()[0]);
         $this->assertSame(1.0, $event->getArguments()[0]->page);
     }
+
+    public function testMapRequestPayloadWithUploadedFiles()
+    {
+        $image = new UploadedFile(self::FIXTURES_BASE_PATH.'/file-small.txt', 'file-small.txt');
+        $input = ['price' => '50'];
+        $files = ['image' => $image];
+        $payload = new RequestPayloadWithFile(50);
+        $payload->image = $image;
+
+        $serializer = new Serializer([new ObjectNormalizer()]);
+
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->once())
+            ->method('validate')
+            ->willReturn(new ConstraintViolationList());
+
+        $resolver = new RequestPayloadValueResolver($serializer, $validator);
+
+        $argument = new ArgumentMetadata('data', RequestPayloadWithFile::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(),
+        ]);
+        $request = Request::create('/', 'POST', $input, [], $files);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        $argument = $resolver->resolve($request, $argument);
+        $event = new ControllerArgumentsEvent($kernel, static function () {}, $argument, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+
+        $this->assertEquals([$payload], $event->getArguments());
+    }
 }
 
 class RequestPayload
@@ -980,6 +1014,11 @@ class RequestPayload
     public function __construct(public readonly float $price)
     {
     }
+}
+
+class RequestPayloadWithFile extends RequestPayload
+{
+    public ?UploadedFile $image = null;
 }
 
 interface SerializerDenormalizer extends SerializerInterface, DenormalizerInterface
