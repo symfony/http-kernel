@@ -618,6 +618,11 @@ class KernelTest extends TestCase
             public function registerContainerConfiguration(LoaderInterface $loader): void
             {
             }
+
+            public function getProjectDir(): string
+            {
+                return __DIR__.'/Fixtures';
+            }
         };
 
         $kernel->boot();
