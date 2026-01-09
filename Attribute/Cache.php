@@ -26,6 +26,11 @@ use Symfony\Component\HttpFoundation\Request;
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::TARGET_FUNCTION | \Attribute::IS_REPEATABLE)]
 final class Cache
 {
+    /**
+     * @internal
+     */
+    public public(set) readonly array $variables;
+
     public function __construct(
         /**
          * The expiration date as a valid date for the strtotime() function.

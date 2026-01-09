@@ -4,6 +4,7 @@ CHANGELOG
 8.1
 ---
 
+ * Add `ControllerAttributeEvent` et al. to dispatch events named after controller attributes
  * Add support for `UploadedFile` when using `MapRequestPayload`
  * Add support for bundles as compiler pass
  * Add support for `SOURCE_DATE_EPOCH` environment variable
