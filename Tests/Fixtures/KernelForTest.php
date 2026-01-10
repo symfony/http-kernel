@@ -17,8 +17,12 @@ use Symfony\Component\HttpKernel\Kernel;
 
 class KernelForTest extends Kernel
 {
-    public function __construct(string $environment, bool $debug, private readonly bool $fakeContainer = true)
-    {
+    public function __construct(
+        string $environment,
+        bool $debug,
+        private readonly bool $fakeContainer = true,
+        private array $bundlesToRegister = [],
+    ) {
         parent::__construct($environment, $debug);
     }
 
@@ -29,7 +33,7 @@ class KernelForTest extends Kernel
 
     public function registerBundles(): iterable
     {
-        return [];
+        return $this->bundlesToRegister;
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader): void

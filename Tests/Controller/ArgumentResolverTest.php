@@ -248,7 +248,7 @@ class ArgumentResolverTest extends TestCase
 
     public function testGetSessionArgumentsWithInterface()
     {
-        $session = $this->createMock(SessionInterface::class);
+        $session = new Session(new MockArraySessionStorage());
         $request = Request::create('/');
         $request->setSession($session);
         $controller = (new ArgumentResolverTestController())->controllerWithSessionInterface(...);
@@ -259,7 +259,7 @@ class ArgumentResolverTest extends TestCase
     public function testGetSessionMissMatchWithInterface()
     {
         $this->expectException(\RuntimeException::class);
-        $session = $this->createMock(SessionInterface::class);
+        $session = new Session(new MockArraySessionStorage());
         $request = Request::create('/');
         $request->setSession($session);
         $controller = (new ArgumentResolverTestController())->controllerWithExtendingSession(...);

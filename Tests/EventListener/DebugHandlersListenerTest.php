@@ -61,7 +61,7 @@ class DebugHandlersListenerTest extends TestCase
         $listener = new DebugHandlersListener(null);
         $eHandler = new ErrorHandler();
         $event = new KernelEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             Request::create('/'),
             HttpKernelInterface::MAIN_REQUEST
         );
