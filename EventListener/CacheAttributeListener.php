@@ -53,7 +53,27 @@ class CacheAttributeListener implements EventSubscriberInterface
     {
         $request = $event->getRequest();
 
+        /** @var Cache[] $attributes */
         if (!$attributes = $request->attributes->get('_cache') ?? $event->getAttributes(Cache::class)) {
+            return;
+        }
+
+        $variables = null;
+        $attributes = array_filter($attributes, function (Cache $cache) use (&$variables, $request, $event) {
+            if (null === $cache->if) {
+                return true;
+            }
+
+            if (!\is_bool($if = $this->evaluate($cache->if, $variables ??= $this->getVariables($request, $event)))) {
+                throw new \TypeError(\sprintf('The value of the "$if" option of the "%s" attribute must evaluate to a boolean, "%s" given.', Cache::class, get_debug_type($if)));
+            }
+
+            return $if;
+        });
+
+        if (!$attributes) {
+            $request->attributes->remove('_cache');
+
             return;
         }
 
@@ -61,9 +81,7 @@ class CacheAttributeListener implements EventSubscriberInterface
         $response = null;
         $lastModified = null;
         $etag = null;
-        $variables = null;
 
-        /** @var Cache[] $attributes */
         foreach ($attributes as $cache) {
             if (null !== $cache->lastModified) {
                 $lastModified = $this->evaluate($cache->lastModified, $variables ??= $this->getVariables($request, $event));

@@ -11,6 +11,7 @@ CHANGELOG
  * Add `Request` attribute `_controller_attributes` to decouple controller attributes from their source code
  * Pass `request` and `args` variables to `Cache` attribute expressions containing the `Request` object and controller arguments
  * Allow using closures with the `Cache` attribute
+ * Allow setting a condition when the `Cache` attribute should be applied
 
 8.0
 ---

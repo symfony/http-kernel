@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::TARGET_FUNCTION)]
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::TARGET_FUNCTION | \Attribute::IS_REPEATABLE)]
 final class Cache
 {
     public function __construct(
@@ -121,6 +121,18 @@ final class Cache
          * @see https://datatracker.ietf.org/doc/html/rfc7234#section-5.2.2.3
          */
         public ?bool $noStore = null,
+
+        /**
+         * A value evaluated to determine whether the cache attribute should be applied.
+         *
+         * The value may be either an ExpressionLanguage expression or a Closure and
+         * receives all the request attributes and the resolved controller arguments.
+         *
+         * The result must be a boolean. If true the attribute is applied, if false it is ignored.
+         *
+         * @var string|Expression|\Closure(array<string, mixed>, Request): bool|null
+         */
+        public string|Expression|\Closure|null $if = null,
     ) {
     }
 }
