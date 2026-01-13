@@ -221,7 +221,7 @@ class RequestDataCollectorTest extends TestCase
             'sf_redirect' => '{}',
         ]);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
 
         $c = new RequestDataCollector();
         $c->onKernelResponse(new ResponseEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST, $this->createResponse()));
@@ -279,7 +279,7 @@ class RequestDataCollectorTest extends TestCase
 
         $collector->reset();
 
-        $session = $this->createMock(SessionInterface::class);
+        $session = $this->createStub(SessionInterface::class);
         $session->method('getMetadataBag')->willReturnCallback(static function () use ($collector) {
             $collector->collectSessionUsage();
 
@@ -397,8 +397,8 @@ class RequestDataCollectorTest extends TestCase
      */
     protected function injectController($collector, $controller, $request)
     {
-        $resolver = $this->createMock(ControllerResolverInterface::class);
-        $httpKernel = new HttpKernel(new EventDispatcher(), $resolver, null, $this->createMock(ArgumentResolverInterface::class));
+        $resolver = $this->createStub(ControllerResolverInterface::class);
+        $httpKernel = new HttpKernel(new EventDispatcher(), $resolver, null, $this->createStub(ArgumentResolverInterface::class));
         $event = new ControllerEvent($httpKernel, $controller, $request, HttpKernelInterface::MAIN_REQUEST);
         $collector->onKernelController($event);
     }

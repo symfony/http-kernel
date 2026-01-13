@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\RouterDataCollector;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
-use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class RouterDataCollectorTest extends TestCase
 {
@@ -82,7 +82,7 @@ class RouterDataCollectorTest extends TestCase
 
     protected function createControllerEvent(Request $request): ControllerEvent
     {
-        $kernel = $this->createMock(KernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
 
         return new ControllerEvent($kernel, function () {}, $request, null);
     }

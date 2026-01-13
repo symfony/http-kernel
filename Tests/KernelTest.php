@@ -141,7 +141,7 @@ class KernelTest extends TestCase
     public function testBootSetsTheBootedFlagToTrue()
     {
         // use test kernel to access isBooted()
-        $kernel = $this->getKernel(['initializeBundles']);
+        $kernel = new KernelForTest('test', false);
         $kernel->boot();
 
         $this->assertTrue($kernel->isBooted());
@@ -172,7 +172,7 @@ class KernelTest extends TestCase
         $bundle->expects($this->once())
             ->method('shutdown');
 
-        $kernel = $this->getKernel([], [$bundle]);
+        $kernel = new KernelForTest('test', false, true, [$bundle]);
 
         $kernel->boot();
         $kernel->shutdown();
@@ -190,10 +190,7 @@ class KernelTest extends TestCase
             })
         ;
 
-        $kernel = $this->getKernel(['getBundles']);
-        $kernel->expects($this->any())
-            ->method('getBundles')
-            ->willReturn([$bundle]);
+        $kernel = new KernelForTest('test', false, true, [$bundle]);
 
         $kernel->boot();
         $kernel->shutdown();
@@ -227,9 +224,7 @@ class KernelTest extends TestCase
         $catch = true;
         $request = new Request();
 
-        $httpKernelMock = $this->getMockBuilder(HttpKernel::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $httpKernelMock = $this->createStub(HttpKernelInterface::class);
 
         $kernel = $this->getKernel(['getHttpKernel', 'boot']);
         $kernel->expects($this->once())
@@ -254,29 +249,31 @@ class KernelTest extends TestCase
     public function testLocateResourceThrowsExceptionWhenNameIsNotValid()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->getKernel()->locateResource('Foo');
+        (new KernelForTest('test', false))->locateResource('Foo');
     }
 
     public function testLocateResourceThrowsExceptionWhenNameIsUnsafe()
     {
         $this->expectException(\RuntimeException::class);
-        $this->getKernel()->locateResource('@FooBundle/../bar');
+        (new KernelForTest('test', false))->locateResource('@FooBundle/../bar');
     }
 
     public function testLocateResourceThrowsExceptionWhenBundleDoesNotExist()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->getKernel()->locateResource('@FooBundle/config/routing.xml');
+        (new KernelForTest('test', false))->locateResource('@FooBundle/config/routing.xml');
     }
 
     public function testLocateResourceThrowsExceptionWhenResourceDoesNotExist()
     {
+        $bundle = $this->createStub(BundleInterface::class);
+        $bundle->method('getPath')->willReturn(__DIR__.'/Fixtures/Bundle1Bundle');
         $this->expectException(\InvalidArgumentException::class);
         $kernel = $this->getKernel(['getBundle']);
         $kernel
             ->expects($this->once())
             ->method('getBundle')
-            ->willReturn($this->getBundle(__DIR__.'/Fixtures/Bundle1Bundle'))
+            ->willReturn($bundle)
         ;
 
         $kernel->locateResource('@Bundle1Bundle/config/routing.xml');
@@ -284,11 +281,13 @@ class KernelTest extends TestCase
 
     public function testLocateResourceReturnsTheFirstThatMatches()
     {
+        $bundle = $this->createStub(BundleInterface::class);
+        $bundle->method('getPath')->willReturn(__DIR__.'/Fixtures/Bundle1Bundle');
         $kernel = $this->getKernel(['getBundle']);
         $kernel
             ->expects($this->once())
             ->method('getBundle')
-            ->willReturn($this->getBundle(__DIR__.'/Fixtures/Bundle1Bundle'))
+            ->willReturn($bundle)
         ;
 
         $this->assertEquals(__DIR__.'/Fixtures/Bundle1Bundle/foo.txt', $kernel->locateResource('@Bundle1Bundle/foo.txt'));
@@ -296,11 +295,14 @@ class KernelTest extends TestCase
 
     public function testLocateResourceOnDirectories()
     {
+        $bundle = $this->createStub(BundleInterface::class);
+        $bundle->method('getName')->willReturn('Bundle1Bundle');
+        $bundle->method('getPath')->willReturn(__DIR__.'/Fixtures/Bundle1Bundle');
         $kernel = $this->getKernel(['getBundle']);
         $kernel
             ->expects($this->exactly(2))
             ->method('getBundle')
-            ->willReturn($this->getBundle(__DIR__.'/Fixtures/Bundle1Bundle', null, 'Bundle1Bundle'))
+            ->willReturn($bundle)
         ;
 
         $this->assertEquals(
@@ -317,10 +319,12 @@ class KernelTest extends TestCase
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Trying to register two bundles with the same name "DuplicateName"');
-        $fooBundle = $this->getBundle(__DIR__.'/Fixtures/FooBundle', 'FooBundle', 'DuplicateName');
-        $barBundle = $this->getBundle(__DIR__.'/Fixtures/BarBundle', 'BarBundle', 'DuplicateName');
+        $fooBundle = $this->createStub(BundleInterface::class);
+        $fooBundle->method('getName')->willReturn('DuplicateName');
+        $barBundle = $this->createStub(BundleInterface::class);
+        $barBundle->method('getName')->willReturn('DuplicateName');
 
-        $kernel = $this->getKernel([], [$fooBundle, $barBundle]);
+        $kernel = new KernelForTest('test', false, true, [$fooBundle, $barBundle]);
         $kernel->boot();
     }
 
@@ -548,7 +552,7 @@ class KernelTest extends TestCase
      */
     public function testKernelStartTimeIsResetWhileBootingAlreadyBootedKernel()
     {
-        $kernel = $this->getKernel(['initializeBundles'], [], true);
+        $kernel = new KernelForTest('test', true);
         $kernel->boot();
         $preReBoot = $kernel->getStartTime();
 
@@ -596,37 +600,6 @@ class KernelTest extends TestCase
             Request::setTrustedHosts([]);
             Request::setTrustedProxies([], 0);
         }
-    }
-
-    /**
-     * Returns a mock for the BundleInterface.
-     */
-    protected function getBundle($dir = null, $className = null, $bundleName = null): BundleInterface
-    {
-        $bundle = $this
-            ->getMockBuilder(BundleInterface::class)
-            ->disableOriginalConstructor()
-        ;
-
-        if ($className) {
-            $bundle->setMockClassName($className);
-        }
-
-        $bundle = $bundle->getMock();
-
-        $bundle
-            ->expects($this->any())
-            ->method('getName')
-            ->willReturn($bundleName ?? $bundle::class)
-        ;
-
-        $bundle
-            ->expects($this->any())
-            ->method('getPath')
-            ->willReturn($dir)
-        ;
-
-        return $bundle;
     }
 
     /**

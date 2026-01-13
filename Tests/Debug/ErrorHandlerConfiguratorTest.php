@@ -12,8 +12,8 @@
 namespace Symfony\Component\HttpKernel\Tests\Debug;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
 use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\HttpKernel\Debug\ErrorHandlerConfigurator;
 
@@ -21,7 +21,7 @@ class ErrorHandlerConfiguratorTest extends TestCase
 {
     public function testConfigure()
     {
-        $logger = $this->createMock(LoggerInterface::class);
+        $logger = new NullLogger();
         $configurator = new ErrorHandlerConfigurator($logger);
         $handler = new ErrorHandler();
 
@@ -45,14 +45,14 @@ class ErrorHandlerConfiguratorTest extends TestCase
         $deprecationLogger = null;
 
         if ($hasDeprecationLogger) {
-            $deprecationLogger = $this->createMock(LoggerInterface::class);
+            $deprecationLogger = new NullLogger();
             if (null !== $expectedDeprecationLoggerLevels) {
                 $expectedCalls[] = [$deprecationLogger, $expectedDeprecationLoggerLevels, false];
             }
         }
 
         if ($hasLogger) {
-            $logger = $this->createMock(LoggerInterface::class);
+            $logger = new NullLogger();
             if (null !== $expectedLoggerLevels) {
                 $expectedCalls[] = [$logger, $expectedLoggerLevels, false];
             }

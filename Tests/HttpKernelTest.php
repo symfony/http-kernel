@@ -165,15 +165,13 @@ class HttpKernelTest extends TestCase
             $event->setResponse(new Response($event->getThrowable()->getMessage()));
         });
 
-        $controllerResolver = $this->createMock(ControllerResolverInterface::class);
+        $controllerResolver = $this->createStub(ControllerResolverInterface::class);
         $controllerResolver
-            ->expects($this->any())
             ->method('getController')
             ->willReturn(static fn () => throw new \TypeError('foo'));
 
-        $argumentResolver = $this->createMock(ArgumentResolverInterface::class);
+        $argumentResolver = $this->createStub(ArgumentResolverInterface::class);
         $argumentResolver
-            ->expects($this->any())
             ->method('getArguments')
             ->willReturn([]);
 
@@ -499,15 +497,13 @@ class HttpKernelTest extends TestCase
     {
         $controller ??= fn () => new Response('Hello');
 
-        $controllerResolver = $this->createMock(ControllerResolverInterface::class);
+        $controllerResolver = $this->createStub(ControllerResolverInterface::class);
         $controllerResolver
-            ->expects($this->any())
             ->method('getController')
             ->willReturn($controller);
 
-        $argumentResolver = $this->createMock(ArgumentResolverInterface::class);
+        $argumentResolver = $this->createStub(ArgumentResolverInterface::class);
         $argumentResolver
-            ->expects($this->any())
             ->method('getArguments')
             ->willReturn($arguments);
 

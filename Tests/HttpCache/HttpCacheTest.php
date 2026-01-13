@@ -29,9 +29,7 @@ class HttpCacheTest extends HttpCacheTestCase
 {
     public function testTerminateDelegatesTerminationOnlyForTerminableInterface()
     {
-        $storeMock = $this->getMockBuilder(StoreInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $storeMock = $this->createStub(StoreInterface::class);
 
         // does not implement TerminableInterface
         $kernel = new TestKernel();
@@ -57,9 +55,8 @@ class HttpCacheTest extends HttpCacheTestCase
     {
         $terminateEvents = [];
 
-        $eventDispatcher = $this->createMock(EventDispatcher::class);
+        $eventDispatcher = $this->createStub(EventDispatcher::class);
         $eventDispatcher
-            ->expects($this->any())
             ->method('dispatch')
             ->with($this->callback(function ($event) use (&$terminateEvents) {
                 if ($event instanceof TerminateEvent) {
@@ -1775,7 +1772,7 @@ class HttpCacheTest extends HttpCacheTestCase
     public function testUsesOriginalRequestForSurrogate()
     {
         $kernel = $this->createMock(HttpKernelInterface::class);
-        $store = $this->createMock(StoreInterface::class);
+        $store = $this->createStub(StoreInterface::class);
 
         $kernel
             ->expects($this->exactly(2))
