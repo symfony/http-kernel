@@ -322,7 +322,7 @@ class ErrorListenerTest extends TestCase
 
     public function testTerminating()
     {
-        $listener = new ErrorListener('foo', $this->createMock(LoggerInterface::class));
+        $listener = new ErrorListener('foo', new NullLogger());
 
         $kernel = $this->createMock(HttpKernelInterface::class);
         $kernel->expects($this->never())->method('handle');
