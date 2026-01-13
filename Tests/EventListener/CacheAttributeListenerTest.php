@@ -13,7 +13,6 @@ namespace Symfony\Component\HttpKernel\Tests\EventListener;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -455,9 +454,9 @@ class CacheAttributeListenerTest extends TestCase
         return new ResponseEvent($this->getKernel(), $request, HttpKernelInterface::MAIN_REQUEST, $response);
     }
 
-    private function getKernel(): MockObject&HttpKernelInterface
+    private function getKernel(): HttpKernelInterface
     {
-        return $this->createMock(HttpKernelInterface::class);
+        return $this->createStub(HttpKernelInterface::class);
     }
 }
 

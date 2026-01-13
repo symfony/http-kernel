@@ -47,7 +47,7 @@ class RequestPayloadValueResolverTest extends TestCase
     {
         $resolver = new RequestPayloadValueResolver(
             new Serializer(),
-            $this->createMock(ValidatorInterface::class),
+            (new ValidatorBuilder())->getValidator(),
         );
 
         $argument = new ArgumentMetadata('notTyped', null, false, false, null, false, [
@@ -55,7 +55,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['HTTP_CONTENT_TYPE' => 'application/json']);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -80,7 +80,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json']);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -104,7 +104,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'GET');
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -126,7 +126,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json']);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -148,7 +148,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'GET');
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -170,7 +170,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json']);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -195,7 +195,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST');
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -217,7 +217,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'GET');
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -241,7 +241,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -269,7 +269,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -300,7 +300,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -325,7 +325,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'foo/bar'], content: 'foo-bar');
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -355,7 +355,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -370,7 +370,7 @@ class RequestPayloadValueResolverTest extends TestCase
     {
         $this->expectException(HttpException::class);
         $this->expectExceptionMessage('This value was of an unexpected type.');
-        $serializer = $this->createMock(SerializerDenormalizer::class);
+        $serializer = $this->createStub(SerializerDenormalizer::class);
 
         if (null === $types) {
             $exception = new NotNormalizableValueException('Error with no types');
@@ -379,13 +379,13 @@ class RequestPayloadValueResolverTest extends TestCase
         }
         $serializer->method('deserialize')->willThrowException(new PartialDenormalizationException([], [$exception]));
 
-        $resolver = new RequestPayloadValueResolver($serializer, $this->createMock(ValidatorInterface::class));
+        $resolver = new RequestPayloadValueResolver($serializer, (new ValidatorBuilder())->getValidator());
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: '{"price": 50}');
 
         $arguments = $resolver->resolve($request, new ArgumentMetadata('valid', RequestPayload::class, false, false, null, false, [
             MapRequestPayload::class => new MapRequestPayload(),
         ]));
-        $event = new ControllerArgumentsEvent($this->createMock(HttpKernelInterface::class), function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+        $event = new ControllerArgumentsEvent($this->createStub(HttpKernelInterface::class), function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
         $resolver->onKernelControllerArguments($event);
     }
@@ -409,7 +409,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'GET', $query);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -436,7 +436,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         $request = Request::create('/', 'GET', $query);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -469,7 +469,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', $input);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -530,7 +530,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         $request = Request::create('/', 'POST', $input);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -581,7 +581,7 @@ class RequestPayloadValueResolverTest extends TestCase
     public function testItThrowsOnVariadicArgument()
     {
         $serializer = new Serializer();
-        $validator = $this->createMock(ValidatorInterface::class);
+        $validator = (new ValidatorBuilder())->getValidator();
         $resolver = new RequestPayloadValueResolver($serializer, $validator);
 
         $argument = new ArgumentMetadata('variadic', RequestPayload::class, true, false, null, false, [
@@ -608,7 +608,7 @@ class RequestPayloadValueResolverTest extends TestCase
             MapRequestPayload::class => new MapRequestPayload(acceptFormat: $acceptFormat),
         ]);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -669,7 +669,7 @@ class RequestPayloadValueResolverTest extends TestCase
             MapRequestPayload::class => new MapRequestPayload(acceptFormat: $acceptFormat),
         ]);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -738,7 +738,7 @@ class RequestPayloadValueResolverTest extends TestCase
             $attribute::class => $attribute,
         ]);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -761,7 +761,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', $method, $input);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -826,7 +826,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/?page=123');
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -857,7 +857,7 @@ class RequestPayloadValueResolverTest extends TestCase
         ]);
         $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
         $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
