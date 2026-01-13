@@ -97,7 +97,7 @@ class LocaleListenerTest extends TestCase
         $subRequest = new Request();
         $requestStack->push($subRequest);
 
-        $event = new FinishRequestEvent($this->createMock(HttpKernelInterface::class), $subRequest, HttpKernelInterface::MAIN_REQUEST);
+        $event = new FinishRequestEvent($this->createStub(HttpKernelInterface::class), new Request(), HttpKernelInterface::MAIN_REQUEST);
 
         $listener = new LocaleListener($requestStack, 'fr', $router);
         $listener->onKernelFinishRequest($event);
@@ -217,6 +217,6 @@ class LocaleListenerTest extends TestCase
 
     private function getEvent(Request $request): RequestEvent
     {
-        return new RequestEvent($this->createMock(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
+        return new RequestEvent($this->createStub(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
     }
 }

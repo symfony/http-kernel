@@ -118,9 +118,8 @@ class InlineFragmentRendererTest extends TestCase
 
     private function getKernel($returnValue)
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $mocker = $kernel
-            ->expects($this->any())
             ->method('handle')
         ;
 

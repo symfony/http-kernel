@@ -41,12 +41,12 @@ class RouterListenerTest extends TestCase
     #[DataProvider('getPortData')]
     public function testPort($defaultHttpPort, $defaultHttpsPort, $uri, $expectedHttpPort, $expectedHttpsPort)
     {
-        $urlMatcher = $this->createMock(UrlMatcherInterface::class);
+        $urlMatcher = $this->createStub(UrlMatcherInterface::class);
 
         $context = new RequestContext();
         $context->setHttpPort($defaultHttpPort);
         $context->setHttpsPort($defaultHttpsPort);
-        $urlMatcher->expects($this->any())
+        $urlMatcher
             ->method('getContext')
             ->willReturn($context);
 
@@ -71,7 +71,7 @@ class RouterListenerTest extends TestCase
 
     private function createRequestEventForUri(string $uri): RequestEvent
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create($uri);
         $request->attributes->set('_controller', null); // Prevents going in to routing process
 
@@ -80,7 +80,7 @@ class RouterListenerTest extends TestCase
 
     public function testRequestMatcher()
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('http://localhost/');
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
 
@@ -96,12 +96,12 @@ class RouterListenerTest extends TestCase
 
     public function testSubRequestWithDifferentMethod()
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('http://localhost/', 'post');
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
 
-        $requestMatcher = $this->createMock(RequestMatcherInterface::class);
-        $requestMatcher->expects($this->any())
+        $requestMatcher = $this->createStub(RequestMatcherInterface::class);
+        $requestMatcher
                        ->method('matchRequest')
                        ->with($this->isInstanceOf(Request::class))
                        ->willReturn([]);
@@ -112,7 +112,7 @@ class RouterListenerTest extends TestCase
         $listener->onKernelRequest($event);
 
         // sub-request with another HTTP method
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('http://localhost/', 'get');
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::SUB_REQUEST);
 
@@ -134,7 +134,7 @@ class RouterListenerTest extends TestCase
             ->method('info')
             ->with($this->equalTo($log), $this->equalTo($parameters));
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('http://localhost/');
 
         $listener = new RouterListener($requestMatcher, new RequestStack(), new RequestContext(), $logger);
@@ -199,12 +199,12 @@ class RouterListenerTest extends TestCase
     public function testRequestWithBadHost()
     {
         $this->expectException(BadRequestHttpException::class);
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('/');
         $request->headers->set('host', 'bad host %22');
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
 
-        $requestMatcher = $this->createMock(RequestMatcherInterface::class);
+        $requestMatcher = $this->createStub(RequestMatcherInterface::class);
 
         $listener = new RouterListener($requestMatcher, new RequestStack(), new RequestContext());
         $listener->onKernelRequest($event);
@@ -217,17 +217,17 @@ class RouterListenerTest extends TestCase
 
         $context = new RequestContext();
 
-        $urlMatcher = $this->createMock(UrlMatcherInterface::class);
+        $urlMatcher = $this->createStub(UrlMatcherInterface::class);
 
-        $urlMatcher->expects($this->any())
+        $urlMatcher
             ->method('getContext')
             ->willReturn($context);
 
-        $urlMatcher->expects($this->any())
+        $urlMatcher
             ->method('match')
             ->willThrowException(new ResourceNotFoundException());
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('https://www.symfony.com/path');
         $request->headers->set('referer', 'https://www.google.com');
 
@@ -244,17 +244,17 @@ class RouterListenerTest extends TestCase
 
         $context = new RequestContext();
 
-        $urlMatcher = $this->createMock(UrlMatcherInterface::class);
+        $urlMatcher = $this->createStub(UrlMatcherInterface::class);
 
-        $urlMatcher->expects($this->any())
+        $urlMatcher
             ->method('getContext')
             ->willReturn($context);
 
-        $urlMatcher->expects($this->any())
+        $urlMatcher
             ->method('match')
             ->willThrowException(new MethodNotAllowedException(['POST']));
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('https://www.symfony.com/path');
 
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
@@ -266,12 +266,12 @@ class RouterListenerTest extends TestCase
     #[DataProvider('provideRouteMapping')]
     public function testRouteMapping(array $expected, array $parameters)
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('http://localhost/');
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
 
-        $requestMatcher = $this->createMock(RequestMatcherInterface::class);
-        $requestMatcher->expects($this->any())
+        $requestMatcher = $this->createStub(RequestMatcherInterface::class);
+        $requestMatcher
                        ->method('matchRequest')
                        ->with($this->isInstanceOf(Request::class))
                        ->willReturn($parameters);
