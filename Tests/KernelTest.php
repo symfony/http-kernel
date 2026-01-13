@@ -768,8 +768,12 @@ class ThrowingHttpKernel implements HttpKernelInterface
 
 class KernelForTest extends Kernel
 {
-    public function __construct(string $environment, bool $debug, private readonly bool $fakeContainer = true)
-    {
+    public function __construct(
+        string $environment,
+        bool $debug,
+        private readonly bool $fakeContainer = true,
+        private array $registeredBundles = [],
+    ) {
         parent::__construct($environment, $debug);
     }
 
@@ -780,7 +784,7 @@ class KernelForTest extends Kernel
 
     public function registerBundles(): iterable
     {
-        return [];
+        return $this->registeredBundles;
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader): void
