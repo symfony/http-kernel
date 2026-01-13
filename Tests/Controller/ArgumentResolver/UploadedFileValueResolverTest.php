@@ -43,7 +43,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -73,7 +73,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -99,7 +99,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -126,7 +126,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -156,7 +156,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -186,7 +186,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -213,7 +213,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -245,7 +245,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -272,7 +272,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -304,7 +304,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         $event = new ControllerArgumentsEvent(
-            $this->createMock(HttpKernelInterface::class),
+            $this->createStub(HttpKernelInterface::class),
             static function () {},
             $resolver->resolve($request, $argument),
             $request,
@@ -331,7 +331,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         /** @var HttpKernelInterface&MockObject $httpKernel */
-        $httpKernel = $this->createMock(HttpKernelInterface::class);
+        $httpKernel = $this->createStub(HttpKernelInterface::class);
         $event = new ControllerArgumentsEvent(
             $httpKernel,
             static function () {},
@@ -359,7 +359,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         /** @var HttpKernelInterface&MockObject $httpKernel */
-        $httpKernel = $this->createMock(HttpKernelInterface::class);
+        $httpKernel = $this->createStub(HttpKernelInterface::class);
         $event = new ControllerArgumentsEvent(
             $httpKernel,
             static function () {},
@@ -387,7 +387,7 @@ class UploadedFileValueResolverTest extends TestCase
             [$attribute::class => $attribute]
         );
         /** @var HttpKernelInterface&MockObject $httpKernel */
-        $httpKernel = $this->createMock(HttpKernelInterface::class);
+        $httpKernel = $this->createStub(HttpKernelInterface::class);
         $event = new ControllerArgumentsEvent(
             $httpKernel,
             static function () {},

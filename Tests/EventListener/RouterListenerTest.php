@@ -266,12 +266,12 @@ class RouterListenerTest extends TestCase
     #[DataProvider('provideRouteMapping')]
     public function testRouteMapping(array $expected, array $parameters)
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $request = Request::create('http://localhost/');
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
 
-        $requestMatcher = $this->createMock(RequestMatcherInterface::class);
-        $requestMatcher->expects($this->any())
+        $requestMatcher = $this->createStub(RequestMatcherInterface::class);
+        $requestMatcher
                        ->method('matchRequest')
                        ->with($this->isInstanceOf(Request::class))
                        ->willReturn($parameters);
