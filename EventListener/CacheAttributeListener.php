@@ -49,8 +49,6 @@ class CacheAttributeListener implements EventSubscriberInterface
         $request->attributes->set('_cache', $attributes);
         $variables = null;
         $response = null;
-        $lastModified = null;
-        $etag = null;
 
         foreach ($attributes as $cache) {
             if (!\is_bool($cache->if)) {
