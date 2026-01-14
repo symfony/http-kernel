@@ -31,7 +31,7 @@ final class ResponseEvent extends KernelEvent
         Request $request,
         int $requestType,
         private Response $response,
-        private ?ControllerEvent $controllerEvent = null,
+        public readonly ?ControllerArgumentsEvent $controllerArgumentsEvent = null,
     ) {
         parent::__construct($kernel, $request, $requestType);
     }
@@ -44,19 +44,5 @@ final class ResponseEvent extends KernelEvent
     public function setResponse(Response $response): void
     {
         $this->response = $response;
-    }
-
-    /**
-     * @template T of class-string|null
-     *
-     * @param T $className
-     *
-     * @return array<class-string, list<object>>|list<object>
-     *
-     * @psalm-return (T is null ? array<class-string, list<object>> : list<object>)
-     */
-    public function getControllerAttributes(?string $className = null): array
-    {
-        return $this->controllerEvent?->getAttributes($className) ?? [];
     }
 }

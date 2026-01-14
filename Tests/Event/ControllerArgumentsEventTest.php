@@ -59,10 +59,26 @@ class ControllerArgumentsEventTest extends TestCase
 
         $this->assertEquals($expected, $event->getAttributes());
 
-        $expected[Bar::class][] = new Bar('foo');
-        $event->setController($controller, $expected);
+        $attributes = [
+            new Bar('class'),
+            new Bar('method'),
+            new Bar('foo'),
+            new Baz(),
+        ];
+        $event->setController($controller, $attributes);
 
-        $this->assertEquals($expected, $event->getAttributes());
+        $grouped = [
+            Bar::class => [
+                new Bar('class'),
+                new Bar('method'),
+                new Bar('foo'),
+            ],
+            Baz::class => [
+                new Baz(),
+            ],
+        ];
+        $this->assertEquals($grouped, $event->getAttributes());
+        $this->assertEquals($attributes, $event->getAttributes('*'));
         $this->assertSame($controllerEvent->getAttributes(), $event->getAttributes());
     }
 
@@ -82,10 +98,20 @@ class ControllerArgumentsEventTest extends TestCase
 
         $this->assertEquals($expected, $event->getAttributes(Bar::class));
 
-        $expected[] = new Bar('foo');
-        $event->setController($controller, [Bar::class => $expected]);
+        // When setting attributes, provide as flat list
+        $flatAttributes = [
+            new Bar('class'),
+            new Bar('method'),
+            new Bar('foo'),
+        ];
+        $event->setController($controller, $flatAttributes);
 
-        $this->assertEquals($expected, $event->getAttributes(Bar::class));
+        $expectedAfterSet = [
+            new Bar('class'),
+            new Bar('method'),
+            new Bar('foo'),
+        ];
+        $this->assertEquals($expectedAfterSet, $event->getAttributes(Bar::class));
         $this->assertSame($controllerEvent->getAttributes(Bar::class), $event->getAttributes(Bar::class));
     }
 }

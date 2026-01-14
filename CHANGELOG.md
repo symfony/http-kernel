@@ -7,11 +7,13 @@ CHANGELOG
  * Add support for `UploadedFile` when using `MapRequestPayload`
  * Add support for bundles as compiler pass
  * Add support for `SOURCE_DATE_EPOCH` environment variable
- * Add `ResponseEvent::getControllerAttributes()`
+ * Add property `$controllerArgumentsEvent` to `ResponseEvent`
  * Add `Request` attribute `_controller_attributes` to decouple controller attributes from their source code
+ * Return attributes as a flat list when using `Controller[Arguments]Event::getAttributes('*')`
  * Pass `request` and `args` variables to `Cache` attribute expressions containing the `Request` object and controller arguments
  * Allow using closures with the `Cache` attribute
  * Allow setting a condition when the `Cache` attribute should be applied
+ * Deprecate passing a non-flat list of attributes to `Controller::setController()`
 
 8.0
 ---

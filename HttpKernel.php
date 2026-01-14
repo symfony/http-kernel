@@ -167,14 +167,14 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
             throw new NotFoundHttpException(\sprintf('Unable to find the controller for path "%s". The route is wrongly configured.', $request->getPathInfo()));
         }
 
-        $controllerEvent = $event = new ControllerEvent($this, $controller, $request, $type);
+        $event = new ControllerEvent($this, $controller, $request, $type);
         $this->dispatcher->dispatch($event, KernelEvents::CONTROLLER);
         $controller = $event->getController();
 
         // controller arguments
         $arguments = $this->argumentResolver->getArguments($request, $controller, $event->getControllerReflector());
 
-        $event = new ControllerArgumentsEvent($this, $event, $arguments, $request, $type);
+        $controllerArgumentsEvent = $event = new ControllerArgumentsEvent($this, $event, $arguments, $request, $type);
         $this->dispatcher->dispatch($event, KernelEvents::CONTROLLER_ARGUMENTS);
         $controller = $event->getController();
         $arguments = $event->getArguments();
@@ -201,7 +201,7 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
             }
         }
 
-        return $this->filterResponse($response, $request, $type, $controllerEvent);
+        return $this->filterResponse($response, $request, $type, $controllerArgumentsEvent);
     }
 
     /**
@@ -209,9 +209,9 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
      *
      * @throws \RuntimeException if the passed object is not a Response instance
      */
-    private function filterResponse(Response $response, Request $request, int $type, ?ControllerEvent $controllerEvent = null): Response
+    private function filterResponse(Response $response, Request $request, int $type, ?ControllerArgumentsEvent $controllerArgumentsEvent = null): Response
     {
-        $event = new ResponseEvent($this, $request, $type, $response, $controllerEvent);
+        $event = new ResponseEvent($this, $request, $type, $response, $controllerArgumentsEvent);
 
         $this->dispatcher->dispatch($event, KernelEvents::RESPONSE);
 
