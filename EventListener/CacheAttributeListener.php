@@ -58,31 +58,24 @@ class CacheAttributeListener implements EventSubscriberInterface
             return;
         }
 
-        $variables = null;
-        $attributes = array_filter($attributes, function (Cache $cache) use (&$variables, $request, $event) {
-            if (null === $cache->if) {
-                return true;
-            }
-
-            if (!\is_bool($if = $this->evaluate($cache->if, $variables ??= $this->getVariables($request, $event)))) {
-                throw new \TypeError(\sprintf('The value of the "$if" option of the "%s" attribute must evaluate to a boolean, "%s" given.', Cache::class, get_debug_type($if)));
-            }
-
-            return $if;
-        });
-
-        if (!$attributes) {
-            $request->attributes->remove('_cache');
-
-            return;
-        }
-
         $request->attributes->set('_cache', $attributes);
+        $variables = null;
         $response = null;
         $lastModified = null;
         $etag = null;
 
         foreach ($attributes as $cache) {
+            if (!\is_bool($cache->if)) {
+                if (!\is_bool($if = $this->evaluate($cache->if, $variables ??= $this->getVariables($request, $event)))) {
+                    throw new \TypeError(\sprintf('The value of the "$if" option of the "%s" attribute must evaluate to a boolean, "%s" given.', Cache::class, get_debug_type($if)));
+                }
+
+                $cache->if = $if;
+            }
+            if (!$cache->if) {
+                continue;
+            }
+
             if (null !== $cache->lastModified) {
                 $lastModified = $this->evaluate($cache->lastModified, $variables ??= $this->getVariables($request, $event));
                 ($response ??= new Response())->setLastModified($lastModified);
@@ -154,8 +147,15 @@ class CacheAttributeListener implements EventSubscriberInterface
                 return \array_key_exists($key, $this->headerBag->cacheControl);
             }
         };
+        $hasPublicOrPrivateCacheControlDirective = $hasCacheControlDirective('public') || $hasCacheControlDirective('private');
 
-        foreach (array_reverse($attributes) as $cache) {
+        for ($i = \count($attributes) - 1; 0 <= $i; --$i) {
+            $cache = $attributes[$i];
+
+            if (!$cache->if) {
+                continue;
+            }
+
             if (null !== $cache->smaxage && !$hasCacheControlDirective('s-maxage')) {
                 $response->setSharedMaxAge($this->toSeconds($cache->smaxage));
             }
@@ -187,11 +187,7 @@ class CacheAttributeListener implements EventSubscriberInterface
             if (!$hasVary && $cache->vary) {
                 $response->setVary($cache->vary, false);
             }
-        }
 
-        $hasPublicOrPrivateCacheControlDirective = $hasCacheControlDirective('public') || $hasCacheControlDirective('private');
-
-        foreach ($attributes as $cache) {
             if (true === $cache->public && !$hasPublicOrPrivateCacheControlDirective) {
                 $response->setPublic();
             }

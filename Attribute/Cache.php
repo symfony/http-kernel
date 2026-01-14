@@ -130,9 +130,9 @@ final class Cache
          *
          * The result must be a boolean. If true the attribute is applied, if false it is ignored.
          *
-         * @var string|Expression|\Closure(array<string, mixed>, Request): bool|null
+         * @var bool|string|Expression|\Closure(array<string, mixed>, Request):bool
          */
-        public string|Expression|\Closure|null $if = null,
+        public bool|string|Expression|\Closure $if = true,
     ) {
     }
 }
