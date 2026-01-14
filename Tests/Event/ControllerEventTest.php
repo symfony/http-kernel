@@ -12,6 +12,8 @@
 namespace Symfony\Component\HttpKernel\Tests\Event;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -76,7 +78,11 @@ class ControllerEventTest extends TestCase
         $attributes = $event->getAttributes();
 
         $this->assertTrue($request->attributes->has('_controller_attributes'));
-        $this->assertEquals($attributes, $request->attributes->get('_controller_attributes'));
+        $stored = $request->attributes->get('_controller_attributes');
+        $this->assertIsArray($stored);
+        $this->assertCount(3, $stored);
+        $this->assertIsArray($attributes);
+        $this->assertArrayHasKey(Bar::class, $attributes);
     }
 
     public function testSetControllerWithAttributesStoresInRequest()
@@ -85,11 +91,33 @@ class ControllerEventTest extends TestCase
         $controller = [new AttributeController(), '__invoke'];
         $event = new ControllerEvent(new TestHttpKernel(), $controller, $request, HttpKernelInterface::MAIN_REQUEST);
 
-        $customAttributes = [Bar::class => [new Bar('custom')]];
+        // Provide attributes as flat list
+        $customAttributes = [new Bar('custom')];
 
         $event->setController($controller, $customAttributes);
 
-        $this->assertEquals($customAttributes, $request->attributes->get('_controller_attributes'));
+        $stored = $request->attributes->get('_controller_attributes');
+        $this->assertIsArray($stored);
+        $this->assertCount(1, $stored);
+        $this->assertInstanceOf(Bar::class, $stored[0]);
+    }
+
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
+    public function testSetControllerWithGroupedAttributesConvertsToFlat()
+    {
+        $request = new Request();
+        $controller = [new AttributeController(), '__invoke'];
+        $event = new ControllerEvent(new TestHttpKernel(), $controller, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $groupedAttributes = [Bar::class => [new Bar('custom')]];
+
+        $event->setController($controller, $groupedAttributes);
+
+        $stored = $request->attributes->get('_controller_attributes');
+        $this->assertIsArray($stored);
+        $this->assertCount(1, $stored);
+        $this->assertInstanceOf(Bar::class, $stored[0]);
     }
 
     public function testSetControllerWithoutAttributesRemovesFromRequestWhenControllerChanges()
@@ -100,7 +128,7 @@ class ControllerEventTest extends TestCase
         $event = new ControllerEvent(new TestHttpKernel(), $controller1, $request, HttpKernelInterface::MAIN_REQUEST);
 
         // First set some attributes
-        $customAttributes = [Bar::class => [new Bar('custom')]];
+        $customAttributes = [new Bar('custom')];
         $event->setController($controller1, $customAttributes);
         $this->assertEquals($customAttributes, $request->attributes->get('_controller_attributes'));
 

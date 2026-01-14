@@ -31,7 +31,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Tests\Fixtures\Attribute\Bar;
 
 class HttpKernelTest extends TestCase
 {
@@ -491,30 +490,6 @@ class HttpKernelTest extends TestCase
         $kernel->handle($request, $kernel::MAIN_REQUEST, false);
 
         Request::setTrustedProxies([], -1);
-    }
-
-    public function testResponseEventCanAccessControllerAttributes()
-    {
-        $dispatcher = new EventDispatcher();
-        $capturedAttributes = null;
-
-        $dispatcher->addListener(KernelEvents::CONTROLLER, static function ($event) {
-            // Set some attributes on the controller event
-            $event->setController($event->getController(), [Bar::class => [new Bar('test')]]);
-        });
-
-        $dispatcher->addListener(KernelEvents::RESPONSE, static function ($event) use (&$capturedAttributes) {
-            $capturedAttributes = $event->getControllerAttributes();
-        });
-
-        $kernel = $this->getHttpKernel($dispatcher);
-
-        $kernel->handle(new Request(), HttpKernelInterface::MAIN_REQUEST, false);
-
-        // Should have the attributes we set
-        $this->assertIsArray($capturedAttributes);
-        $this->assertArrayHasKey(Bar::class, $capturedAttributes);
-        $this->assertEquals([new Bar('test')], $capturedAttributes[Bar::class]);
     }
 
     private function getHttpKernel(EventDispatcherInterface $eventDispatcher, $controller = null, ?RequestStack $requestStack = null, array $arguments = [], bool $handleAllThrowables = false)

@@ -18,6 +18,7 @@
     "require": {
         "php": ">=8.4",
         "psr/log": "^1|^2|^3",
+        "symfony/deprecation-contracts": "^2.5|^3",
         "symfony/error-handler": "^7.4|^8.0",
         "symfony/event-dispatcher": "^7.4|^8.0",
         "symfony/http-foundation": "^7.4|^8.0",
