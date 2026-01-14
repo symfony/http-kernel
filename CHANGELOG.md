@@ -7,7 +7,7 @@ CHANGELOG
  * Add support for `UploadedFile` when using `MapRequestPayload`
  * Add support for bundles as compiler pass
  * Add support for `SOURCE_DATE_EPOCH` environment variable
- * Add property `$controllerArgumentsEvent` to `ResponseEvent`
+ * Add property `$controllerMetadata` to several kernel events to give listeners access to controller metadata
  * Add `Request` attribute `_controller_attributes` to decouple controller attributes from their source code
  * Return attributes as a flat list when using `Controller[Arguments]Event::getAttributes('*')`
  * Pass `request` and `args` variables to `Cache` attribute expressions containing the `Request` object and controller arguments
@@ -16,6 +16,7 @@ CHANGELOG
  * Deprecate passing a non-flat list of attributes to `Controller::setController()`
  * Deprecate the `Symfony\Component\HttpKernel\DependencyInjection\Extension` class, use the parent `Symfony\Component\DependencyInjection\Extension\Extension` class instead
  * Allow using Expression or \Closure for `validationGroups` in `#[MapRequestPayload]` and `#[MapQueryString]`
+ * Deprecate passing a `ControllerArgumentsEvent` to the `ViewEvent` constructor; pass a `ControllerArgumentsMetadata` instead
 
 8.0
 ---

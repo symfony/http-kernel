@@ -61,17 +61,26 @@ final class ControllerArgumentsEvent extends KernelEvent
         unset($this->namedArguments);
     }
 
+    /**
+     * @return list<mixed>
+     */
     public function getArguments(): array
     {
         return $this->arguments;
     }
 
+    /**
+     * @param list<mixed> $arguments
+     */
     public function setArguments(array $arguments): void
     {
         $this->arguments = $arguments;
         unset($this->namedArguments);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getNamedArguments(): array
     {
         if (isset($this->namedArguments)) {

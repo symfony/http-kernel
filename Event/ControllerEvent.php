@@ -21,8 +21,6 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  * setController() you can set a new controller that is used in the processing
  * of the request.
  *
- * Controllers should be callables.
- *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
 final class ControllerEvent extends KernelEvent
