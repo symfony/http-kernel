@@ -76,9 +76,9 @@ final class Cache
          *
          * The result must be an instance of \DateTimeInterface.
          *
-         * @var string|Expression|\Closure(array<string, mixed>, Request): \DateTimeInterface|null
+         * @var \DateTimeInterface|string|Expression|\Closure(array<string, mixed>, Request):\DateTimeInterface|null
          */
-        public string|Expression|\Closure|null $lastModified = null,
+        public \DateTimeInterface|string|Expression|\Closure|null $lastModified = null,
 
         /**
          * A value evaluated to compute the ETag HTTP header.
@@ -88,7 +88,7 @@ final class Cache
          *
          * The result must be a string that will be hashed.
          *
-         * @var string|Expression|\Closure(array<string, mixed>, Request): string|null
+         * @var string|Expression|\Closure(array<string, mixed>, Request):string|null
          */
         public string|Expression|\Closure|null $etag = null,
 

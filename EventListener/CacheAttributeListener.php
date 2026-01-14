@@ -29,21 +29,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 class CacheAttributeListener implements EventSubscriberInterface
 {
-    /**
-     * @var \SplObjectStorage<Request, \DateTimeInterface>
-     */
-    private \SplObjectStorage $lastModified;
-
-    /**
-     * @var \SplObjectStorage<Request, string>
-     */
-    private \SplObjectStorage $etags;
-
     public function __construct(
         private ?ExpressionLanguage $expressionLanguage = null,
     ) {
-        $this->lastModified = new \SplObjectStorage();
-        $this->etags = new \SplObjectStorage();
     }
 
     /**
@@ -76,14 +64,16 @@ class CacheAttributeListener implements EventSubscriberInterface
                 continue;
             }
 
-            if (null !== $cache->lastModified) {
+            if (null !== $cache->lastModified && !$cache->lastModified instanceof \DateTimeInterface) {
                 $lastModified = $this->evaluate($cache->lastModified, $variables ??= $this->getVariables($request, $event));
                 ($response ??= new Response())->setLastModified($lastModified);
+                $cache->lastModified = $lastModified;
             }
 
             if (null !== $cache->etag) {
                 $etag = hash('sha256', $this->evaluate($cache->etag, $variables ??= $this->getVariables($request, $event)));
                 ($response ??= new Response())->setEtag($etag);
+                $cache->etag = $etag;
             }
         }
 
@@ -92,13 +82,6 @@ class CacheAttributeListener implements EventSubscriberInterface
             $event->stopPropagation();
 
             return;
-        }
-
-        if (null !== $etag) {
-            $this->etags[$request] = $etag;
-        }
-        if (null !== $lastModified) {
-            $this->lastModified[$request] = $lastModified;
         }
     }
 
@@ -117,22 +100,9 @@ class CacheAttributeListener implements EventSubscriberInterface
 
         // http://tools.ietf.org/html/draft-ietf-httpbis-p4-conditional-12#section-3.1
         if (!\in_array($response->getStatusCode(), [200, 203, 300, 301, 302, 304, 404, 410], true)) {
-            unset($this->lastModified[$request]);
-            unset($this->etags[$request]);
-
             return;
         }
 
-        if (isset($this->lastModified[$request]) && !$response->headers->has('Last-Modified')) {
-            $response->setLastModified($this->lastModified[$request]);
-        }
-
-        if (isset($this->etags[$request]) && !$response->headers->has('Etag')) {
-            $response->setEtag($this->etags[$request]);
-        }
-
-        unset($this->lastModified[$request]);
-        unset($this->etags[$request]);
         // Check if the response has a Vary header that should be considered, ignoring cases where
         // it's only 'Accept-Language' and the request has the '_vary_by_language' attribute
         $hasVary = ['Accept-Language'] === $response->getVary() ? !$request->attributes->get('_vary_by_language') : $response->hasVary();
@@ -154,6 +124,14 @@ class CacheAttributeListener implements EventSubscriberInterface
 
             if (!$cache->if) {
                 continue;
+            }
+
+            if (null !== $cache->lastModified && !$response->headers->has('Last-Modified')) {
+                $response->setLastModified($cache->lastModified);
+            }
+
+            if (null !== $cache->etag && !$response->headers->has('ETag')) {
+                $response->setEtag($cache->etag);
             }
 
             if (null !== $cache->smaxage && !$hasCacheControlDirective('s-maxage')) {
@@ -216,8 +194,6 @@ class CacheAttributeListener implements EventSubscriberInterface
 
     public function reset(): void
     {
-        $this->lastModified = new \SplObjectStorage();
-        $this->etags = new \SplObjectStorage();
     }
 
     private function evaluate(string|Expression|\Closure $closureOrExpression, array $variables): mixed
