@@ -29,7 +29,7 @@ class IsSignatureValidAttributeListenerTest extends TestCase
 
         $signer = $this->createMock(UriSigner::class);
         $signer->expects($this->once())->method('verify')->with($request);
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
 
         $event = new ControllerArgumentsEvent(
             $kernel,
@@ -45,7 +45,7 @@ class IsSignatureValidAttributeListenerTest extends TestCase
 
     public function testNoAttributeSkipsValidation()
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $signer = $this->createMock(UriSigner::class);
         $signer->expects($this->never())->method('verify');
 
@@ -66,7 +66,7 @@ class IsSignatureValidAttributeListenerTest extends TestCase
         $request = new Request();
         $signer = $this->createMock(UriSigner::class);
         $signer->expects($this->once())->method('verify')->with($request);
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
 
         $event = new ControllerArgumentsEvent(
             $kernel,
@@ -85,7 +85,7 @@ class IsSignatureValidAttributeListenerTest extends TestCase
         $request = new Request();
         $signer = $this->createMock(UriSigner::class);
         $signer->expects($this->once())->method('verify')->willThrowException(new UnsignedUriException());
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
 
         $event = new ControllerArgumentsEvent(
             $kernel,
@@ -107,7 +107,7 @@ class IsSignatureValidAttributeListenerTest extends TestCase
 
         $signer = $this->createMock(UriSigner::class);
         $signer->expects($this->exactly(2))->method('verify')->with($request);
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
 
         $event = new ControllerArgumentsEvent(
             $kernel,
@@ -127,7 +127,7 @@ class IsSignatureValidAttributeListenerTest extends TestCase
 
         $signer = $this->createMock(UriSigner::class);
         $signer->expects($this->once())->method('verify')->with($request);
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
 
         $event = new ControllerArgumentsEvent(
             $kernel,
@@ -147,7 +147,7 @@ class IsSignatureValidAttributeListenerTest extends TestCase
 
         $signer = $this->createMock(UriSigner::class);
         $signer->expects($this->once())->method('verify')->with($request);
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
 
         $event = new ControllerArgumentsEvent(
             $kernel,
@@ -165,7 +165,7 @@ class IsSignatureValidAttributeListenerTest extends TestCase
     {
         $request = new Request([], [], [], [], [], ['REQUEST_METHOD' => 'GET']);
 
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $signer = $this->createMock(UriSigner::class);
         $signer->expects($this->never())->method('verify');
 

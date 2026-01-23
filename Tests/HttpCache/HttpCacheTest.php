@@ -752,7 +752,7 @@ class HttpCacheTest extends HttpCacheTestCase
 
         $primedStore = $this->store;
 
-        $this->store = $this->createMock(Store::class);
+        $this->store = $this->createStub(Store::class);
         $this->store->method('lookup')->willReturnCallback(fn (Request $request) => $primedStore->lookup($request));
         // Assume the cache is locked at the first attempt, but immediately treat the lock as released afterwards
         $this->store->method('lock')->willReturnOnConsecutiveCalls(false, true);
