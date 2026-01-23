@@ -79,7 +79,7 @@ class DumpListenerTest extends TestCase
         $dumper = new MockDumper();
         $profilerDumper = new MockProfilerDumper();
 
-        $input = $this->createMock(InputInterface::class);
+        $input = $this->createStub(InputInterface::class);
         $input->method('hasOption')->willReturn($hasOption);
         $input->method('getOption')->willReturn($option);
 
