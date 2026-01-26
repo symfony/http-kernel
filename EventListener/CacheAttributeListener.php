@@ -197,7 +197,7 @@ class CacheAttributeListener implements EventSubscriberInterface
     private function evaluate(string|Expression|\Closure $closureOrExpression, array $variables): mixed
     {
         if ($closureOrExpression instanceof \Closure) {
-            return $closureOrExpression($variables['args'], $variables['request']);
+            return $closureOrExpression($variables['args'], $variables['request'], $variables['this']);
         }
 
         return $this->getExpressionLanguage()->evaluate($closureOrExpression, $variables);
@@ -205,9 +205,17 @@ class CacheAttributeListener implements EventSubscriberInterface
 
     private function getVariables(Request $request, ControllerArgumentsEvent $event): array
     {
+        $controller = $event->getController();
+        $controller = match (true) {
+            \is_object($controller) && !$controller instanceof \Closure => $controller,
+            \is_array($controller) && \is_object($controller[0]) => $controller[0],
+            default => null,
+        };
+
         return array_merge([
             'request' => $request,
             'args' => $arguments = $event->getNamedArguments(),
+            'this' => $controller,
         ], $request->attributes->all(), $arguments);
     }
 
