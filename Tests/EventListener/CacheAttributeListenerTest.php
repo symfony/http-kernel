@@ -342,21 +342,13 @@ class CacheAttributeListenerTest extends TestCase
     public static function provideLastModifiedHeaderAndEtagClosureCases(): iterable
     {
         yield 'using arguments' => [
-            static function (array $arguments, Request $request) {
-                return $arguments['test']->getDate();
-            },
-            static function (array $arguments, Request $request) {
-                return $arguments['test']->getId();
-            },
+            static fn (array $arguments, Request $request) => $arguments['test']->getDate(),
+            static fn (array $arguments, Request $request) => $arguments['test']->getId(),
         ];
 
         yield 'using request attributes' => [
-            static function (array $arguments, Request $request) {
-                return $request->attributes->get('date');
-            },
-            static function (array $arguments, Request $request) {
-                return $request->attributes->get('id');
-            },
+            static fn (array $arguments, Request $request) => $request->attributes->get('date'),
+            static fn (array $arguments, Request $request) => $request->attributes->get('id'),
         ];
     }
 
