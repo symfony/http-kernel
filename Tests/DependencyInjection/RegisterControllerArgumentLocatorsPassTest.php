@@ -458,10 +458,33 @@ class RegisterControllerArgumentLocatorsPassTest extends TestCase
 
         $expected = [
             'apiKey' => new ServiceClosureArgument(new Reference('the_api_key')),
-            'service1' => new ServiceClosureArgument(new TypedReference(ControllerDummy::class, ControllerDummy::class, ContainerInterface::RUNTIME_EXCEPTION_ON_INVALID_REFERENCE, 'imageStorage')),
+            'service1' => new ServiceClosureArgument(new TypedReference(ControllerDummy::class, ControllerDummy::class, ContainerInterface::RUNTIME_EXCEPTION_ON_INVALID_REFERENCE, 'imageStorage', [new Target('image.storage')])),
             'service2' => new ServiceClosureArgument(new TypedReference(ControllerDummy::class, ControllerDummy::class, ContainerInterface::RUNTIME_EXCEPTION_ON_INVALID_REFERENCE, 'service2')),
         ];
         $this->assertEquals($expected, $locator->getArgument(0));
+    }
+
+    public function testTargetAttributeUsesShortNameForControllerArguments()
+    {
+        $container = new ContainerBuilder();
+        $resolver = $container->register('argument_resolver.service')->addArgument([]);
+
+        $container->register('limiter.anonymous_action', DummyRateLimiterFactory::class);
+        $container->registerAliasForArgument('limiter.anonymous_action', DummyLimiterFactoryInterface::class, 'anonymous_action.limiter', 'anonymous_action');
+
+        $container->register('foo', WithTargetShortName::class)
+            ->addTag('controller.service_arguments');
+
+        (new RegisterControllerArgumentLocatorsPass())->process($container);
+
+        $locator = $container->getDefinition((string) $resolver->getArgument(0))->getArgument(0);
+        $locator = $container->getDefinition((string) $locator['foo::fooAction']->getValues()[0]);
+
+        $argument = $locator->getArgument(0)['limiterFactory']->getValues()[0];
+        $this->assertInstanceOf(TypedReference::class, $argument);
+        $this->assertSame(DummyLimiterFactoryInterface::class, $argument->getType());
+        $this->assertSame('anonymous_action', $argument->getName());
+        $this->assertEquals([new Target('anonymous_action')], $argument->getAttributes());
     }
 
     public function testResponseArgumentIsIgnored()
@@ -681,6 +704,28 @@ class WithTarget
         ControllerDummy $service1,
         ControllerDummy $service2,
     ) {
+    }
+}
+
+class WithTargetShortName
+{
+    public function fooAction(
+        #[Target('anonymous_action')]
+        DummyLimiterFactoryInterface $limiterFactory,
+    ) {
+    }
+}
+
+interface DummyLimiterFactoryInterface
+{
+    public function create(mixed $key = null): object;
+}
+
+class DummyRateLimiterFactory implements DummyLimiterFactoryInterface
+{
+    public function create(mixed $key = null): object
+    {
+        throw new \BadMethodCallException('Not used in tests.');
     }
 }
 
