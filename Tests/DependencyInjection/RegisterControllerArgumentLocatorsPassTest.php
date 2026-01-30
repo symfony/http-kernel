@@ -483,6 +483,7 @@ class RegisterControllerArgumentLocatorsPassTest extends TestCase
 
         $locator = $container->getDefinition((string) $resolver->getArgument(0))->getArgument(0);
         $locator = $container->getDefinition((string) $locator['foo::fooAction']->getValues()[0]);
+        $locator = $container->getDefinition((string) $locator->getFactory()[0]);
 
         $argument = $locator->getArgument(0)['limiterFactory']->getValues()[0];
         $this->assertInstanceOf(TypedReference::class, $argument);
