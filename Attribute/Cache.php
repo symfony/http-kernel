@@ -76,7 +76,7 @@ final class Cache
          *
          * The result must be an instance of \DateTimeInterface.
          *
-         * @var \DateTimeInterface|string|Expression|\Closure(array<string, mixed>, Request):\DateTimeInterface|null
+         * @var \DateTimeInterface|string|Expression|\Closure(array<string, mixed>, Request, ?object):\DateTimeInterface|null
          */
         public \DateTimeInterface|string|Expression|\Closure|null $lastModified = null,
 
@@ -88,7 +88,7 @@ final class Cache
          *
          * The result must be a string that will be hashed.
          *
-         * @var string|Expression|\Closure(array<string, mixed>, Request):string|null
+         * @var string|Expression|\Closure(array<string, mixed>, Request, ?object):string|null
          */
         public string|Expression|\Closure|null $etag = null,
 
@@ -130,7 +130,7 @@ final class Cache
          *
          * The result must be a boolean. If true the attribute is applied, if false it is ignored.
          *
-         * @var bool|string|Expression|\Closure(array<string, mixed>, Request):bool
+         * @var bool|string|Expression|\Closure(array<string, mixed>, Request, ?object):bool
          */
         public bool|string|Expression|\Closure $if = true,
     ) {
