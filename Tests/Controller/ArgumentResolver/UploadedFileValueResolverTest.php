@@ -85,6 +85,44 @@ class UploadedFileValueResolverTest extends TestCase
         $resolver->onKernelControllerArguments($event);
     }
 
+    public function testEmptyArrayUploadedFileArgument()
+    {
+        $resolver = new RequestPayloadValueResolver(
+            new Serializer(),
+            (new ValidatorBuilder())->getValidator()
+        );
+        $request = Request::create(
+            '/',
+            'POST',
+            files: [
+                'qux' => [],
+            ],
+            server: ['HTTP_CONTENT_TYPE' => 'multipart/form-data']
+        );
+
+        $attribute = new MapUploadedFile();
+        $argument = new ArgumentMetadata(
+            'qux',
+            UploadedFile::class,
+            false,
+            false,
+            null,
+            false,
+            [$attribute::class => $attribute]
+        );
+        $event = new ControllerArgumentsEvent(
+            $this->createStub(HttpKernelInterface::class),
+            static function () {},
+            $resolver->resolve($request, $argument),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        $this->expectException(HttpException::class);
+
+        $resolver->onKernelControllerArguments($event);
+    }
+
     #[DataProvider('provideContext')]
     public function testEmptyArrayArgument(RequestPayloadValueResolver $resolver, Request $request)
     {
