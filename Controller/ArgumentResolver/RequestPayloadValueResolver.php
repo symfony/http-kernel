@@ -12,6 +12,8 @@
 namespace Symfony\Component\HttpKernel\Controller\ArgumentResolver;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
@@ -32,6 +34,7 @@ use Symfony\Component\Serializer\Exception\UnsupportedFormatException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\GroupSequence;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
@@ -40,6 +43,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @author Konstantin Myakshin <molodchick@gmail.com>
+ *
+ * @psalm-type GroupResolver = \Closure(array<string, mixed>, Request, ?object):string|GroupSequence|array<string>
  *
  * @final
  */
@@ -64,6 +69,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         private readonly ?ValidatorInterface $validator = null,
         private readonly ?TranslatorInterface $translator = null,
         private string $translationDomain = 'validators',
+        private ?ExpressionLanguage $expressionLanguage = null,
     ) {
     }
 
@@ -147,7 +153,8 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                     if (\is_array($payload) && !empty($constraints) && !$constraints instanceof Assert\All) {
                         $constraints = new Assert\All($constraints);
                     }
-                    $violations->addAll($this->validator->validate($payload, $constraints, $argument->validationGroups ?? null));
+                    $groups = $this->resolveValidationGroups($argument->validationGroups ?? null, $event);
+                    $violations->addAll($this->validator->validate($payload, $constraints, $groups));
                 }
 
                 if (\count($violations)) {
@@ -261,5 +268,64 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         return $params;
+    }
+
+    private function resolveValidationGroups(Expression|string|GroupSequence|\Closure|array|null $validationGroups, ControllerArgumentsEvent $event): string|GroupSequence|array|null
+    {
+        $controller = $event->getController();
+        $controller = match (true) {
+            \is_object($controller) => $controller,
+            \is_array($controller) && \is_object($controller[0]) => $controller[0],
+            default => null,
+        };
+
+        if ($validationGroups instanceof Expression) {
+            $validationGroups = $this->getExpressionLanguage()->evaluate($validationGroups, [
+                'request' => $event->getRequest(),
+                'args' => $event->getNamedArguments(),
+                'this' => $controller,
+            ]);
+        }
+
+        if ($validationGroups instanceof \Closure) {
+            $validationGroups = $validationGroups($event->getNamedArguments(), $event->getRequest(), $controller);
+        }
+
+        if (null === $validationGroups || \is_string($validationGroups) || $validationGroups instanceof GroupSequence) {
+            return $validationGroups;
+        }
+
+        if (!\is_array($validationGroups)) {
+            throw new \LogicException('The validation groups expression or closure must return a string, an array of strings, or a GroupSequence.');
+        }
+
+        foreach ($validationGroups as $group) {
+            if ($group instanceof Expression) {
+                throw new \LogicException('Nested expressions in validation groups are not supported. Use a single Expression or a list of strings (or a GroupSequence) instead.');
+            }
+
+            if ($group instanceof \Closure) {
+                throw new \LogicException('Nested closures in validation groups are not supported. Use a single Closure or a list of strings (or a GroupSequence) instead.');
+            }
+
+            if ($group instanceof GroupSequence) {
+                throw new \LogicException('GroupSequence cannot be used inside an array of validation groups. Pass the GroupSequence as the top-level validationGroups value instead.');
+            }
+
+            if (!\is_string($group)) {
+                throw new \LogicException('Validation groups must be strings.');
+            }
+        }
+
+        return $validationGroups;
+    }
+
+    private function getExpressionLanguage(): ExpressionLanguage
+    {
+        if (!class_exists(ExpressionLanguage::class)) {
+            throw new \LogicException('You cannot use expressions in controller attributes as the ExpressionLanguage component is not available. Try running "composer require symfony/expression-language".');
+        }
+
+        return $this->expressionLanguage ??= new ExpressionLanguage();
     }
 }
