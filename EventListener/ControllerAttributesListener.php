@@ -12,6 +12,7 @@
 namespace Symfony\Component\HttpKernel\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\Event\ControllerAttributeEvent;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -21,6 +22,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 // Help opcache.preload discover always-needed symbols
 class_exists(ControllerAttributeEvent::class);
+class_exists(ExpressionLanguage::class);
 
 /**
  * Dispatches events for controller attributes.
@@ -34,7 +36,9 @@ class ControllerAttributesListener implements EventSubscriberInterface
      */
     public function __construct(
         private readonly array $attributesWithListenersByEvent,
+        private ?ExpressionLanguage $expressionLanguage = null,
     ) {
+        $this->expressionLanguage ??= class_exists(ExpressionLanguage::class, false) ? new ExpressionLanguage() : null;
     }
 
     private static array $attributeHierarchyCache = [];
@@ -50,7 +54,7 @@ class ControllerAttributesListener implements EventSubscriberInterface
             }
 
             foreach ($attributeEventNames as $attributeEventName) {
-                $dispatcher->dispatch(new ControllerAttributeEvent($attribute, $event), $attributeEventName);
+                $dispatcher->dispatch(new ControllerAttributeEvent($attribute, $event, $this->expressionLanguage), $attributeEventName);
 
                 if ($event->isPropagationStopped()) {
                     return;
@@ -74,7 +78,7 @@ class ControllerAttributesListener implements EventSubscriberInterface
             $attributeEventNames = $this->getAttributeEventNames($attribute, $eventName);
 
             for ($j = \count($attributeEventNames) - 1; $j >= 0; --$j) {
-                $dispatcher->dispatch(new ControllerAttributeEvent($attribute, $event), $attributeEventNames[$j]);
+                $dispatcher->dispatch(new ControllerAttributeEvent($attribute, $event, $this->expressionLanguage), $attributeEventNames[$j]);
 
                 if ($event->isPropagationStopped()) {
                     return;

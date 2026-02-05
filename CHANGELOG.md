@@ -14,6 +14,7 @@ CHANGELOG
  * Pass `request` and `args` variables to `Cache` attribute expressions containing the `Request` object and controller arguments
  * Allow using closures with the `Cache` attribute
  * Allow setting a condition when the `Cache` attribute should be applied
+ * Add `ControllerEvent::evaluate()` et al. to help with evaluating expressions or closures in controller attributes
  * Deprecate passing a non-flat list of attributes to `Controller::setController()`
  * Deprecate the `Symfony\Component\HttpKernel\DependencyInjection\Extension` class, use the parent `Symfony\Component\DependencyInjection\Extension\Extension` class instead
  * Allow using Expression or \Closure for `validationGroups` in `#[MapRequestPayload]` and `#[MapQueryString]`

@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\HttpKernel\Event;
 
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+
 /**
  * Provides read-only access to controller metadata.
  *
@@ -43,5 +45,10 @@ class ControllerMetadata
     public function getAttributes(?string $className = null): array
     {
         return $this->controllerEvent->getAttributes($className);
+    }
+
+    public function evaluate(mixed $value, ?ExpressionLanguage $expressionLanguage): mixed
+    {
+        return $this->controllerEvent->evaluate($value, $expressionLanguage);
     }
 }

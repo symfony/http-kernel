@@ -12,6 +12,8 @@
 namespace Symfony\Component\HttpKernel\Event;
 
 use Psr\EventDispatcher\StoppableEventInterface;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * Event dispatched for each controller attribute.
@@ -31,6 +33,7 @@ final class ControllerAttributeEvent implements StoppableEventInterface
         /** @var T */
         public readonly object $attribute,
         public readonly KernelEvent $kernelEvent,
+        private readonly ?ExpressionLanguage $expressionLanguage = null,
     ) {
         $this->controller = match (true) {
             $kernelEvent instanceof ControllerEvent => $kernelEvent->getController(),
@@ -41,7 +44,9 @@ final class ControllerAttributeEvent implements StoppableEventInterface
 
     public function isPropagationStopped(): bool
     {
-        if ($this->kernelEvent->isPropagationStopped()) {
+        $event = $this->kernelEvent;
+
+        if ($event->isPropagationStopped()) {
             return true;
         }
 
@@ -50,10 +55,26 @@ final class ControllerAttributeEvent implements StoppableEventInterface
         }
 
         $controller = match (true) {
-            $this->kernelEvent instanceof ControllerEvent => $this->kernelEvent->getController(),
-            $this->kernelEvent instanceof ControllerArgumentsEvent => $this->kernelEvent->getController(),
+            $event instanceof ControllerEvent => $event->getController(),
+            $event instanceof ControllerArgumentsEvent => $event->getController(),
         };
 
         return $controller instanceof \Closure ? $controller != $this->controller : $controller !== $this->controller;
+    }
+
+    public function evaluate(mixed $value, ?ExpressionLanguage $expressionLanguage = null): mixed
+    {
+        if (!$value instanceof \Closure && !$value instanceof Expression) {
+            return $value;
+        }
+
+        $event = $this->kernelEvent;
+        $expressionLanguage ??= $this->expressionLanguage;
+
+        return match (true) {
+            $event instanceof ControllerEvent => $event->evaluate($value, $expressionLanguage),
+            $event instanceof ControllerArgumentsEvent => $event->evaluate($value, $expressionLanguage),
+            ($m = $event->controllerMetadata ?? null) instanceof ControllerMetadata => $m->evaluate($value, $expressionLanguage),
+        };
     }
 }

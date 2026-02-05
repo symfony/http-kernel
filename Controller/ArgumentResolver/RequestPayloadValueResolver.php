@@ -276,23 +276,8 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
 
     private function resolveValidationGroups(Expression|string|GroupSequence|\Closure|array|null $validationGroups, ControllerArgumentsEvent $event): string|GroupSequence|array|null
     {
-        $controller = $event->getController();
-        $controller = match (true) {
-            \is_object($controller) => $controller,
-            \is_array($controller) && \is_object($controller[0]) => $controller[0],
-            default => null,
-        };
-
-        if ($validationGroups instanceof Expression) {
-            $validationGroups = $this->getExpressionLanguage()->evaluate($validationGroups, [
-                'request' => $event->getRequest(),
-                'args' => $event->getNamedArguments(),
-                'this' => $controller,
-            ]);
-        }
-
-        if ($validationGroups instanceof \Closure) {
-            $validationGroups = $validationGroups($event->getNamedArguments(), $event->getRequest(), $controller);
+        if ($validationGroups instanceof Expression || $validationGroups instanceof \Closure) {
+            $validationGroups = $event->evaluate($validationGroups, $this->expressionLanguage);
         }
 
         if (null === $validationGroups || \is_string($validationGroups) || $validationGroups instanceof GroupSequence) {
@@ -322,14 +307,5 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         return $validationGroups;
-    }
-
-    private function getExpressionLanguage(): ExpressionLanguage
-    {
-        if (!class_exists(ExpressionLanguage::class)) {
-            throw new \LogicException('You cannot use expressions in controller attributes as the ExpressionLanguage component is not available. Try running "composer require symfony/expression-language".');
-        }
-
-        return $this->expressionLanguage ??= new ExpressionLanguage();
     }
 }
