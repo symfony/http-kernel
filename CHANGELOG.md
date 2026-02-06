@@ -4,6 +4,7 @@ CHANGELOG
 8.1
 ---
 
+ * Add `hasErrors()` method to `Profile` to track profiles with errors (exceptions or error-level logs)
  * Validate typed route parameters before calling controllers and return an HTTP error when an invalid value is provided
  * Add `ControllerAttributeEvent` et al. to dispatch events named after controller attributes
  * Add support for `UploadedFile` when using `MapRequestPayload`

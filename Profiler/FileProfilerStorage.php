@@ -62,7 +62,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
                 continue;
             }
 
-            [$csvToken, $csvIp, $csvMethod, $csvUrl, $csvTime, $csvParent, $csvStatusCode, $csvVirtualType] = $values + [7 => null];
+            [$csvToken, $csvIp, $csvMethod, $csvUrl, $csvTime, $csvParent, $csvStatusCode, $csvVirtualType, $csvHasErrors] = $values + [7 => null, 8 => null];
             $csvTime = (int) $csvTime;
 
             $urlFilter = false;
@@ -91,6 +91,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
                 'parent' => $csvParent,
                 'status_code' => $csvStatusCode,
                 'virtual_type' => $csvVirtualType ?: 'request',
+                'has_errors' => (bool) $csvHasErrors,
             ];
 
             if ($filter && !$filter($profile)) {
@@ -159,6 +160,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
             'time' => $profile->getTime(),
             'status_code' => $profile->getStatusCode(),
             'virtual_type' => $profile->getVirtualType() ?? 'request',
+            'has_errors' => $profile->hasErrors(),
         ];
 
         $data = serialize($data);
@@ -186,6 +188,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
                 $profile->getParentToken(),
                 $profile->getStatusCode(),
                 $profile->getVirtualType() ?? 'request',
+                $profile->hasErrors() ? '1' : '0',
             ], ',', '"', '\\');
             fclose($file);
 
@@ -271,6 +274,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
         $profile->setTime($data['time']);
         $profile->setStatusCode($data['status_code']);
         $profile->setVirtualType($data['virtual_type'] ?: 'request');
+        $profile->setHasErrors($data['has_errors'] ?? false);
         $profile->setCollectors($data['data']);
 
         if (!$parent && $data['parent']) {
