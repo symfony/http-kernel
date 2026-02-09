@@ -472,7 +472,7 @@ class RequestDataCollectorTest extends TestCase
 
         $curlCommand = $c->getCurlCommand();
         $this->assertStringStartsWith("curl \\\n  --compressed", $curlCommand);
-        $this->assertStringContainsString("--url 'http://test.com/foo?bar=baz'", $curlCommand);
+        $this->assertStringContainsString('--url '.('\\' === \DIRECTORY_SEPARATOR ? '"http://test.com/foo?bar=baz"' : "'http://test.com/foo?bar=baz'"), $curlCommand);
         $this->assertStringNotContainsString('--request', $curlCommand);
     }
 
@@ -486,7 +486,7 @@ class RequestDataCollectorTest extends TestCase
         $curlCommand = $c->getCurlCommand();
         $this->assertStringContainsString('--request POST', $curlCommand);
         $this->assertStringContainsString('--data-raw', $curlCommand);
-        $this->assertStringContainsString('{"key":"value"}', $curlCommand);
+        $this->assertStringContainsString('\\' === \DIRECTORY_SEPARATOR ? '"{""key"":""value""}"' : '\'{"key":"value"}\'', $curlCommand);
     }
 
     public function testCurlCommandHead()
@@ -511,8 +511,8 @@ class RequestDataCollectorTest extends TestCase
         $c->collect($request, $this->createResponse());
 
         $curlCommand = $c->getCurlCommand();
-        $this->assertStringContainsString("--header 'Accept: application/json'", $curlCommand);
-        $this->assertStringContainsString("--header 'X-Custom-Header: custom-value'", $curlCommand);
+        $this->assertStringContainsString('--header '.('\\' === \DIRECTORY_SEPARATOR ? '"Accept: application/json"' : "'Accept: application/json'"), $curlCommand);
+        $this->assertStringContainsString('--header '.('\\' === \DIRECTORY_SEPARATOR ? '"X-Custom-Header: custom-value"' : "'X-Custom-Header: custom-value'"), $curlCommand);
         $this->assertStringNotContainsString('Host:', $curlCommand);
     }
 
