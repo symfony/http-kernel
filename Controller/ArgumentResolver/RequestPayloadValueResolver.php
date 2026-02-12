@@ -168,6 +168,11 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                 }
             }
 
+            if ($argument->metadata->isVariadic()) {
+                array_splice($arguments, $i, 1, $payload ?? []);
+                continue;
+            }
+
             if (null === $payload) {
                 $payload = match (true) {
                     $argument->metadata->hasDefaultValue() => $argument->metadata->getDefaultValue(),
@@ -176,11 +181,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                 };
             }
 
-            if ($argument->metadata->isVariadic()) {
-                array_splice($arguments, $i, 1, $payload);
-            } else {
-                $arguments[$i] = $payload;
-            }
+            $arguments[$i] = $payload;
         }
 
         $event->setArguments($arguments);
@@ -246,7 +247,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
     private function mapUploadedFile(Request $request, ArgumentMetadata $argument, MapUploadedFile $attribute): UploadedFile|array|null
     {
         if ($files = $request->files->get($attribute->name ?? $argument->getName())) {
-            return $files;
+            return !\is_array($files) && $argument->isVariadic() ? [$files] : $files;
         }
 
         if ($argument->isNullable() || $argument->hasDefaultValue()) {
