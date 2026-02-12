@@ -297,6 +297,36 @@ class UploadedFileValueResolverTest extends TestCase
     }
 
     #[DataProvider('provideContext')]
+    public function testSingleFileVariadic(RequestPayloadValueResolver $resolver, Request $request)
+    {
+        $attribute = new MapUploadedFile();
+        $argument = new ArgumentMetadata(
+            'foo',
+            UploadedFile::class,
+            true,
+            false,
+            null,
+            false,
+            [$attribute::class => $attribute]
+        );
+        $event = new ControllerArgumentsEvent(
+            $this->createStub(HttpKernelInterface::class),
+            static function () {},
+            $resolver->resolve($request, $argument),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+        $resolver->onKernelControllerArguments($event);
+
+        /** @var UploadedFile[] $data */
+        $data = $event->getArguments();
+
+        $this->assertCount(1, $data);
+        $this->assertSame('file-small.txt', $data[0]->getFilename());
+        $this->assertSame(36, $data[0]->getSize());
+    }
+
+    #[DataProvider('provideContext')]
     public function testMultipleFilesVariadic(RequestPayloadValueResolver $resolver, Request $request)
     {
         $attribute = new MapUploadedFile();
@@ -319,7 +349,7 @@ class UploadedFileValueResolverTest extends TestCase
         $resolver->onKernelControllerArguments($event);
 
         /** @var UploadedFile[] $data */
-        $data = $event->getArguments()[0];
+        $data = $event->getArguments();
 
         $this->assertCount(2, $data);
         $this->assertSame('file-small.txt', $data[0]->getFilename());
