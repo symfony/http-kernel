@@ -55,8 +55,9 @@ class HttpCacheTest extends HttpCacheTestCase
     {
         $terminateEvents = [];
 
-        $eventDispatcher = $this->createStub(EventDispatcher::class);
+        $eventDispatcher = $this->createMock(EventDispatcher::class);
         $eventDispatcher
+            ->expects($this->atLeastOnce())
             ->method('dispatch')
             ->with($this->callback(static function ($event) use (&$terminateEvents) {
                 if ($event instanceof TerminateEvent) {
