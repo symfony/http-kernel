@@ -102,9 +102,8 @@ class RouterListenerTest extends TestCase
 
         $requestMatcher = $this->createStub(RequestMatcherInterface::class);
         $requestMatcher
-                       ->method('matchRequest')
-                       ->with($this->isInstanceOf(Request::class))
-                       ->willReturn([]);
+            ->method('matchRequest')
+            ->willReturn([]);
 
         $context = new RequestContext();
 
@@ -272,9 +271,8 @@ class RouterListenerTest extends TestCase
 
         $requestMatcher = $this->createStub(RequestMatcherInterface::class);
         $requestMatcher
-                       ->method('matchRequest')
-                       ->with($this->isInstanceOf(Request::class))
-                       ->willReturn($parameters);
+            ->method('matchRequest')
+            ->willReturn($parameters);
 
         $listener = new RouterListener($requestMatcher, new RequestStack(), new RequestContext());
         $listener->onKernelRequest($event);
