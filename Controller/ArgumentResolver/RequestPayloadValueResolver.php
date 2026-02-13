@@ -21,6 +21,7 @@ use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Serializer\Exception\InvalidArgumentException as SerializerInvalidArgumentException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Exception\UnsupportedFormatException;
@@ -119,6 +120,9 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                         $violations->add(new ConstraintViolation($message, $template, $parameters, null, $error->getPath(), null));
                     }
                     $payload = $e->getData();
+                } catch (SerializerInvalidArgumentException $e) {
+                    $violations->add(new ConstraintViolation($e->getMessage(), $e->getMessage(), [], null, '', null));
+                    $payload = null;
                 }
 
                 if (null !== $payload && !\count($violations)) {
@@ -133,6 +137,8 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                     $payload = $this->$payloadMapper($request, $type, $argument);
                 } catch (PartialDenormalizationException $e) {
                     throw new HttpException($validationFailedCode, implode("\n", array_map(static fn ($e) => $e->getMessage(), $e->getErrors())), $e);
+                } catch (SerializerInvalidArgumentException $e) {
+                    throw new HttpException($validationFailedCode, $e->getMessage(), $e);
                 }
             }
 
