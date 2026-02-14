@@ -30,6 +30,7 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
+use Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
@@ -281,6 +282,37 @@ class RequestPayloadValueResolverTest extends TestCase
             $this->assertSame(422, $e->getStatusCode());
             $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
             $this->assertSame('This value should be of type string.', $validationFailedException->getViolations()[0]->getMessage());
+        }
+    }
+
+    public function testValidationFailedOnInvalidBackedEnum()
+    {
+        $content = '{"method": "INVALID"}';
+        $serializer = new Serializer([new BackedEnumNormalizer(), new ObjectNormalizer()], ['json' => new JsonEncoder()]);
+
+        $validator = $this->createMock(ValidatorInterface::class);
+        $validator->expects($this->never())
+            ->method('validate');
+
+        $resolver = new RequestPayloadValueResolver($serializer, $validator);
+
+        $argument = new ArgumentMetadata('invalid', RequestPayloadWithBackedEnum::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(),
+        ]);
+        $request = Request::create('/', 'POST', server: ['CONTENT_TYPE' => 'application/json'], content: $content);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        $arguments = $resolver->resolve($request, $argument);
+        $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        try {
+            $resolver->onKernelControllerArguments($event);
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
+        } catch (HttpException $e) {
+            $validationFailedException = $e->getPrevious();
+            $this->assertSame(422, $e->getStatusCode());
+            $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
+            $this->assertSame('The data must belong to a backed enumeration of type Symfony\\Component\\HttpKernel\\Tests\\Controller\\ArgumentResolver\\RequestMethod', $validationFailedException->getViolations()[0]->getMessage());
         }
     }
 
@@ -1012,6 +1044,19 @@ class User
     {
         return $this->password;
     }
+}
+
+class RequestPayloadWithBackedEnum
+{
+    public function __construct(public readonly RequestMethod $method)
+    {
+    }
+}
+
+enum RequestMethod: string
+{
+    case GET = 'GET';
+    case POST = 'POST';
 }
 
 class ObjectWithBoolArgument
