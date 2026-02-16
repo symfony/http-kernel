@@ -162,7 +162,7 @@ class HttpKernelBrowserTest extends TestCase
             ->method('getSize')
             ->willReturn(\PHP_INT_MAX)
         ;
-        $file->expects($this->any())
+        $file
             ->method('getClientSize')
             ->willReturn(\PHP_INT_MAX)
         ;
