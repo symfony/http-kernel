@@ -752,7 +752,7 @@ EOF
         ;
 
         $kernel = $kernelMockBuilder->getMock();
-        $kernel->expects($this->any())
+        $kernel
             ->method('registerBundles')
             ->willReturn($bundles)
         ;
