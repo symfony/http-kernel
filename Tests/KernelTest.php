@@ -624,7 +624,7 @@ class KernelTest extends TestCase
         ;
 
         $kernel = $kernelMockBuilder->getMock();
-        $kernel->expects($this->any())
+        $kernel
             ->method('registerBundles')
             ->willReturn($bundles)
         ;
