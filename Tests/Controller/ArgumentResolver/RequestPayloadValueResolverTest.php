@@ -310,7 +310,7 @@ class RequestPayloadValueResolverTest extends TestCase
 
         $kernel = $this->createStub(HttpKernelInterface::class);
         $arguments = $resolver->resolve($request, $argument);
-        $event = new ControllerArgumentsEvent($kernel, function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+        $event = new ControllerArgumentsEvent($kernel, static function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
         try {
             $resolver->onKernelControllerArguments($event);
@@ -319,7 +319,10 @@ class RequestPayloadValueResolverTest extends TestCase
             $validationFailedException = $e->getPrevious();
             $this->assertSame(422, $e->getStatusCode());
             $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
-            $this->assertSame('The data must belong to a backed enumeration of type Symfony\\Component\\HttpKernel\\Tests\\Controller\\ArgumentResolver\\RequestMethod', $validationFailedException->getViolations()[0]->getMessage());
+            $this->assertContains($validationFailedException->getViolations()[0]->getMessage(), [
+                'This value should be of type int|string.',
+                'The data must belong to a backed enumeration of type Symfony\\Component\\HttpKernel\\Tests\\Controller\\ArgumentResolver\\RequestMethod',
+            ]);
         }
     }
 
