@@ -105,7 +105,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                 try {
                     $payload = $this->$payloadMapper($request, $type, $argument);
                 } catch (PartialDenormalizationException $e) {
-                    $trans = $this->translator ? $this->translator->trans(...) : fn ($m, $p) => strtr($m, $p);
+                    $trans = $this->translator ? $this->translator->trans(...) : static fn ($m, $p) => strtr($m, $p);
                     foreach ($e->getErrors() as $error) {
                         $parameters = [];
                         $template = 'This value was of an unexpected type.';
@@ -187,7 +187,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         if (\is_array($data)) {
-            return $this->serializer->denormalize($data, $type, 'csv', $attribute->serializationContext + self::CONTEXT_DENORMALIZE);
+            return $this->serializer->denormalize($data, $type, 'form' === $format ? 'csv' : $format, $attribute->serializationContext + self::CONTEXT_DENORMALIZE);
         }
 
         if ('form' === $format) {
