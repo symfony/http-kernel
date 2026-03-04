@@ -223,7 +223,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         if (\is_array($data)) {
-            return $this->serializer->denormalize($data, $type, 'form' === $format ? 'csv' : $format, $attribute->serializationContext + self::CONTEXT_DENORMALIZE + ('form' === $format ? ['filter_bool' => true] : []));
+            return $this->serializer->denormalize($data, $type, self::hasNonStringScalar($data) ? $format : 'csv', $attribute->serializationContext + self::CONTEXT_DENORMALIZE + ('form' === $format ? ['filter_bool' => true] : []));
         }
 
         if ('form' === $format) {
@@ -252,5 +252,22 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
         }
 
         return 'array' === $argument->getType() ? [] : null;
+    }
+
+    private static function hasNonStringScalar(array $data): bool
+    {
+        $stack = [$data];
+
+        while ($stack) {
+            foreach (array_pop($stack) as $v) {
+                if (\is_array($v)) {
+                    $stack[] = $v;
+                } elseif (!\is_string($v)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
