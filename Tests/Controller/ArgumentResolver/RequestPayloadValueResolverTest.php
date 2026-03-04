@@ -897,6 +897,32 @@ class RequestPayloadValueResolverTest extends TestCase
         $this->assertInstanceOf(FormPayloadWithBool::class, $payload);
         $this->assertFalse($payload->active);
     }
+
+    public function testMapRequestPayloadWithJsonContentTypeStringValuesCoercesToBool()
+    {
+        $serializer = new Serializer(
+            [new ObjectNormalizer(null, null, null, new ReflectionExtractor())],
+            []
+        );
+
+        $resolver = new RequestPayloadValueResolver($serializer);
+
+        $argument = new ArgumentMetadata('payload', FormPayloadWithBool::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(),
+        ]);
+        $request = new Request([], ['active' => '0'], [], [], [], ['CONTENT_TYPE' => 'application/json']);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        $arguments = $resolver->resolve($request, $argument);
+        $event = new ControllerArgumentsEvent($kernel, static fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+
+        /** @var FormPayloadWithBool $payload */
+        [$payload] = $event->getArguments();
+        $this->assertInstanceOf(FormPayloadWithBool::class, $payload);
+        $this->assertFalse($payload->active);
+    }
 }
 
 class RequestPayload
