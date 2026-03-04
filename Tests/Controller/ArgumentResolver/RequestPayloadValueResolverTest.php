@@ -1005,6 +1005,58 @@ class RequestPayloadValueResolverTest extends TestCase
         $this->assertInstanceOf(QueryPayload::class, $event->getArguments()[0]);
         $this->assertSame(1.0, $event->getArguments()[0]->page);
     }
+
+    public function testMapRequestPayloadWithPreParsedJsonIntCoercesToFloat()
+    {
+        $serializer = new Serializer(
+            [new ObjectNormalizer(null, null, null, new ReflectionExtractor())],
+            ['json' => new JsonEncoder()]
+        );
+
+        $resolver = new RequestPayloadValueResolver($serializer);
+
+        $argument = new ArgumentMetadata('payload', RequestPayload::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(),
+        ]);
+        $request = new Request([], ['price' => 0], [], [], [], ['CONTENT_TYPE' => 'application/json']);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        $arguments = $resolver->resolve($request, $argument);
+        $event = new ControllerArgumentsEvent($kernel, static fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+
+        /** @var RequestPayload $payload */
+        [$payload] = $event->getArguments();
+        $this->assertInstanceOf(RequestPayload::class, $payload);
+        $this->assertSame(0.0, $payload->price);
+    }
+
+    public function testMapRequestPayloadWithFormDataCoercesStringToBool()
+    {
+        $serializer = new Serializer(
+            [new ObjectNormalizer(null, null, null, new ReflectionExtractor())],
+            []
+        );
+
+        $resolver = new RequestPayloadValueResolver($serializer);
+
+        $argument = new ArgumentMetadata('payload', FormPayloadWithBool::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(),
+        ]);
+        $request = new Request([], ['active' => '0'], [], [], [], ['CONTENT_TYPE' => 'application/x-www-form-urlencoded']);
+
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        $arguments = $resolver->resolve($request, $argument);
+        $event = new ControllerArgumentsEvent($kernel, static fn () => null, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $resolver->onKernelControllerArguments($event);
+
+        /** @var FormPayloadWithBool $payload */
+        [$payload] = $event->getArguments();
+        $this->assertInstanceOf(FormPayloadWithBool::class, $payload);
+        $this->assertFalse($payload->active);
+    }
 }
 
 class RequestPayload
@@ -1065,6 +1117,13 @@ enum RequestMethod: string
 class ObjectWithBoolArgument
 {
     public function __construct(public readonly ?bool $value = null)
+    {
+    }
+}
+
+class FormPayloadWithBool
+{
+    public function __construct(public readonly bool $active)
     {
     }
 }
