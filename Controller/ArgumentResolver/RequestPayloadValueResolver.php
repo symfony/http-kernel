@@ -151,7 +151,11 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                     if (\is_array($payload) && !empty($constraints) && !$constraints instanceof Assert\All) {
                         $constraints = new Assert\All($constraints);
                     }
-                    $violations->addAll($this->validator->validate($payload, $constraints, $argument->validationGroups ?? null));
+                    if ($argument instanceof MapUploadedFile) {
+                        $violations->addAll($this->validator->startContext()->atPath($argument->metadata->getName())->validate($payload, $constraints, $argument->validationGroups ?? null)->getViolations());
+                    } else {
+                        $violations->addAll($this->validator->validate($payload, $constraints, $argument->validationGroups ?? null));
+                    }
                 }
 
                 if (\count($violations)) {
