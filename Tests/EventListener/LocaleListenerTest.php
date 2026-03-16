@@ -22,6 +22,7 @@ use Symfony\Component\HttpKernel\EventListener\LocaleListener;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\RequestContextAwareInterface;
 use Symfony\Component\Routing\Router;
 
 class LocaleListenerTest extends TestCase
@@ -231,6 +232,41 @@ class LocaleListenerTest extends TestCase
         $listener->setDefaultLocale($event);
         $listener->onKernelRequest($event);
         $this->assertEquals('it', $request->getLocale());
+    }
+
+    public function testFinishRequestWithNoParentResetsRouterContextToDefault()
+    {
+        $context = new RequestContext();
+        $router = $this->createStub(RequestContextAwareInterface::class);
+        $router->method('getContext')->willReturn($context);
+
+        $request = Request::create('/');
+        $request->attributes->set('_locale', 'en');
+
+        $listener = new LocaleListener($this->requestStack, 'fr', $router);
+        $listener->onKernelRequest($this->getEvent($request));
+
+        $this->assertSame('en', $context->getParameter('_locale'));
+
+        $this->requestStack->method('getParentRequest')->willReturn(null);
+        $event = new FinishRequestEvent($this->createStub(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
+        $listener->onKernelFinishRequest($event);
+
+        $this->assertSame('fr', $context->getParameter('_locale'));
+    }
+
+    public function testSetDefaultLocaleSetsRouterContext()
+    {
+        $context = new RequestContext();
+        $router = $this->createStub(RequestContextAwareInterface::class);
+        $router->method('getContext')->willReturn($context);
+
+        $listener = new LocaleListener($this->requestStack, 'fr', $router);
+        $request = Request::create('/');
+        $event = $this->getEvent($request);
+        $listener->setDefaultLocale($event);
+
+        $this->assertSame('fr', $context->getParameter('_locale'));
     }
 
     private function getEvent(Request $request): RequestEvent
