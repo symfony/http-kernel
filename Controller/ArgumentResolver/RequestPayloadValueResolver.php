@@ -207,7 +207,7 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
 
     private function mapQueryString(Request $request, ArgumentMetadata $argument, MapQueryString $attribute): ?object
     {
-        if (!($data = $request->query->all($attribute->key)) && ($argument->isNullable() || $argument->hasDefaultValue())) {
+        if (!($data = $request->query->all($attribute->key)) && ($argument->isNullable() || $argument->hasDefaultValue()) && !$attribute->mapWhenEmpty) {
             return null;
         }
 
@@ -216,8 +216,12 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
 
     private function mapRequestPayload(Request $request, ArgumentMetadata $argument, MapRequestPayload $attribute): object|array|null
     {
-        if ('' === ($data = $request->request->all() ?: $request->getContent()) && ($argument->isNullable() || $argument->hasDefaultValue())) {
-            return null;
+        if ('' === $data = $request->request->all() ?: $request->getContent()) {
+            if ($attribute->mapWhenEmpty) {
+                $data = [];
+            } elseif ($argument->isNullable() || $argument->hasDefaultValue()) {
+                return null;
+            }
         }
 
         if (null === $format = $request->getContentTypeFormat()) {
