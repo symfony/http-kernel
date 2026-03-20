@@ -31,7 +31,7 @@
         "symfony/config": "^7.4|^8.0",
         "symfony/console": "^7.4|^8.0",
         "symfony/css-selector": "^7.4|^8.0",
-        "symfony/dependency-injection": "^7.4|^8.0",
+        "symfony/dependency-injection": "^8.1",
         "symfony/dom-crawler": "^7.4|^8.0",
         "symfony/expression-language": "^7.4|^8.0",
         "symfony/finder": "^7.4|^8.0",
@@ -53,6 +53,7 @@
         "psr/log-implementation": "1.0|2.0|3.0"
     },
     "conflict": {
+        "symfony/dependency-injection": "<8.1",
         "symfony/flex": "<2.10",
         "symfony/http-client-contracts": "<2.5",
         "symfony/translation-contracts": "<2.5",
