@@ -110,8 +110,12 @@ abstract class Bundle implements BundleInterface
         return $this->name;
     }
 
+    /**
+     * @deprecated since Symfony 8.1, use the #[AsCommand] attribute or the "console.command" service tag instead of overriding this method
+     */
     public function registerCommands(Application $application): void
     {
+        trigger_deprecation('symfony/http-kernel', '8.1', 'The "%s::registerCommands()" method is deprecated, use the #[AsCommand] attribute or the "console.command" service tag instead of overriding this method', self::class);
     }
 
     /**
