@@ -320,12 +320,8 @@ class KernelTest extends TestCase
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Trying to register two bundles with the same name "DuplicateName"');
-        $fooBundle = $this->createStub(BundleInterface::class);
-        $fooBundle->method('getName')->willReturn('DuplicateName');
-        $barBundle = $this->createStub(BundleInterface::class);
-        $barBundle->method('getName')->willReturn('DuplicateName');
 
-        $kernel = new KernelForTest('test', false, true, [$fooBundle, $barBundle]);
+        $kernel = new KernelForTest('test', false, true, [new DuplicateNameBundleA(), new DuplicateNameBundleB()]);
         $kernel->boot();
     }
 
@@ -881,4 +877,14 @@ class KernelForTestWithLoadClassCache extends KernelForTest
     public function doLoadClassCache(): void
     {
     }
+}
+
+class DuplicateNameBundleA extends Bundle
+{
+    protected string $name = 'DuplicateName';
+}
+
+class DuplicateNameBundleB extends Bundle
+{
+    protected string $name = 'DuplicateName';
 }
