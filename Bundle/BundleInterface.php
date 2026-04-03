@@ -18,4 +18,5 @@ use Symfony\Component\DependencyInjection\Kernel\BundleInterface as BaseBundleIn
  */
 interface BundleInterface extends BaseBundleInterface
 {
+    public function getNamespace(): string;
 }

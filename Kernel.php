@@ -219,9 +219,15 @@ abstract class Kernel extends AbstractKernel implements KernelInterface, Reboota
 
     protected function getKernelParameters(): array
     {
-        return $this->doGetKernelParameters() + [
+        $parameters = $this->doGetKernelParameters() + [
             'kernel.charset' => $this->getCharset(),
         ];
+
+        foreach ($this->bundles as $name => $bundle) {
+            $parameters['kernel.bundles_metadata'][$name]['namespace'] = $bundle->getNamespace();
+        }
+
+        return $parameters;
     }
 
     private function preBoot(): void

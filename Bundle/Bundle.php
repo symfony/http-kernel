@@ -23,6 +23,8 @@ use Symfony\Component\DependencyInjection\Kernel\AbstractBundle as BaseAbstractB
  */
 abstract class Bundle extends BaseAbstractBundle implements BundleInterface
 {
+    private string $namespace;
+
     /**
      * Returns the bundle's container extension.
      *
@@ -55,14 +57,14 @@ abstract class Bundle extends BaseAbstractBundle implements BundleInterface
         return $this->extension ?: null;
     }
 
+    public function getNamespace(): string
+    {
+        return $this->namespace ??= false === ($pos = strrpos(static::class, '\\')) ? '' : substr(static::class, 0, $pos);
+    }
+
     public function getPath(): string
     {
-        if (!isset($this->path)) {
-            $reflected = new \ReflectionObject($this);
-            $this->path = \dirname($reflected->getFileName());
-        }
-
-        return $this->path;
+        return $this->path ??= \dirname((new \ReflectionClass($this))->getFileName());
     }
 
     /**

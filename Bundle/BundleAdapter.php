@@ -21,6 +21,8 @@ use Symfony\Component\DependencyInjection\Kernel\BundleInterface as BaseBundleIn
  */
 final class BundleAdapter implements BundleInterface
 {
+    private string $namespace;
+
     public function __construct(
         private readonly BaseBundleInterface $bundle,
     ) {
@@ -53,7 +55,7 @@ final class BundleAdapter implements BundleInterface
 
     public function getNamespace(): string
     {
-        return $this->bundle->getNamespace();
+        return $this->namespace ??= false === ($pos = strrpos($this->bundle::class, '\\')) ? '' : substr($this->bundle::class, 0, $pos);
     }
 
     public function getPath(): string
