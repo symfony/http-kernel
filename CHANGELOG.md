@@ -29,6 +29,7 @@ CHANGELOG
  * Deprecate `BundleInterface`, use the one from the DependencyInjection component instead
  * Deprecate `MergeExtensionConfigurationPass`, use the one from the DependencyInjection component instead
  * Deprecate `FileLocator`, use the one from the DependencyInjection component instead
+ * Add `#[RateLimit]` attribute to declaratively enforce rate limiting on controllers.
 
 8.0
 ---
