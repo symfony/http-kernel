@@ -196,7 +196,14 @@ abstract class Kernel extends AbstractKernel implements KernelInterface, Reboota
 
     protected function initializeContainer(): void
     {
+        $cachePath = $this->getEffectiveBuildDir().'/'.$this->getContainerClass().'.php';
+        $oldMtime = is_file($cachePath) ? filemtime($cachePath) : false;
+
         $this->doInitializeContainer();
+
+        if (false !== $oldMtime && filemtime($cachePath) === $oldMtime) {
+            return;
+        }
 
         $buildDir = $this->container->getParameter('kernel.build_dir');
         $cacheDir = $this->container->getParameter('kernel.cache_dir');

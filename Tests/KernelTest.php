@@ -466,6 +466,21 @@ class KernelTest extends TestCase
         $this->assertSame(realpath($kernel->getBuildDir()), $kernel->warmedUpBuildDir);
     }
 
+    public function testWarmupIsNotRunOnSubsequentBoot()
+    {
+        $kernel = new CustomProjectDirKernel();
+        $kernel->boot();
+
+        $this->assertTrue($kernel->warmedUp);
+
+        $kernel->shutdown();
+
+        $kernel = new CustomProjectDirKernel();
+        $kernel->boot();
+
+        $this->assertFalse($kernel->warmedUp);
+    }
+
     public function testServicesResetter()
     {
         $httpKernelMock = $this->getMockBuilder(HttpKernelInterface::class)
