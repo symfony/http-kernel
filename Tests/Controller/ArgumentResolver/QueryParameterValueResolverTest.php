@@ -47,8 +47,8 @@ class QueryParameterValueResolverTest extends TestCase
      *   Request,
      *   ArgumentMetadata,
      *   array<mixed>,
-     *   null|class-string<\Exception>,
-     *   null|string
+     *   class-string<\Exception>|null,
+     *   string|null
      * }>
      */
     public static function provideTestResolve(): iterable

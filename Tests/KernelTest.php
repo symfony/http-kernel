@@ -245,11 +245,8 @@ class KernelTest extends TestCase
         $kernel->handle($request, $type, $catch);
     }
 
-    /**
-     * @dataProvider getStripCommentsCodes
-     *
-     * @group legacy
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getStripCommentsCodes')]
+    #[\PHPUnit\Framework\Attributes\Group('legacy')]
     public function testStripComments(string $source, string $expected)
     {
         $this->expectDeprecation('Since symfony/http-kernel 6.4: Method "Symfony\Component\HttpKernel\Kernel::stripComments()" is deprecated without replacement.');
@@ -277,48 +274,49 @@ class KernelTest extends TestCase
             ['<?php echo/**/\foo();', '<?php echo \foo();'],
             ['<?php echo/** bar */\foo();', '<?php echo \foo();'],
             ['<?php /**/echo \foo();', '<?php echo \foo();'],
-            [<<<'EOF'
-                <?php
-                include_once \dirname(__DIR__).'/foo.php';
+            [
+                <<<'EOF'
+                    <?php
+                    include_once \dirname(__DIR__).'/foo.php';
 
-                $string = 'string should not be   modified';
+                    $string = 'string should not be   modified';
 
-                $string = 'string should not be
+                    $string = 'string should not be
 
-                modified';
-
-
-                $heredoc = <<<HD
+                    modified';
 
 
-                Heredoc should not be   modified {$a[1+$b]}
+                    $heredoc = <<<HD
 
 
-                HD;
-
-                $nowdoc = <<<'ND'
+                    Heredoc should not be   modified {$a[1+$b]}
 
 
-                Nowdoc should not be   modified
+                    HD;
+
+                    $nowdoc = <<<'ND'
 
 
-                ND;
+                    Nowdoc should not be   modified
 
-                /**
-                 * some class comments to strip
-                 */
-                class TestClass
-                {
+
+                    ND;
+
                     /**
-                     * some method comments to strip
+                     * some class comments to strip
                      */
-                    public function doStuff()
+                    class TestClass
                     {
-                        // inline comment
+                        /**
+                         * some method comments to strip
+                         */
+                        public function doStuff()
+                        {
+                            // inline comment
+                        }
                     }
-                }
-                EOF
-                , <<<'EOF'
+                    EOF,
+                <<<'EOF'
                     <?php
                     include_once \dirname(__DIR__).'/foo.php';
                     $string = 'string should not be   modified';
@@ -345,7 +343,7 @@ class KernelTest extends TestCase
                         {
                             }
                     }
-                    EOF
+                    EOF,
             ],
         ];
     }
@@ -660,9 +658,7 @@ class KernelTest extends TestCase
         $this->assertSame('cached: /worker-second', $secondResponse->getContent());
     }
 
-    /**
-     * @group time-sensitive
-     */
+    #[\PHPUnit\Framework\Attributes\Group('time-sensitive')]
     public function testKernelStartTimeIsResetWhileBootingAlreadyBootedKernel()
     {
         $kernel = new KernelForTest('test', true);
@@ -696,9 +692,7 @@ class KernelTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*TestDebugContainer$/', $kernel->getContainerClass());
     }
 
-    /**
-     * @group legacy
-     */
+    #[\PHPUnit\Framework\Attributes\Group('legacy')]
     public function testKernelWithParameterDeprecation()
     {
         $kernel = new class('test', true) extends Kernel {
