@@ -25,13 +25,13 @@ class ControllerArgumentsEventTest extends TestCase
 {
     public function testControllerArgumentsEvent()
     {
-        $event = new ControllerArgumentsEvent(new TestHttpKernel(), function () {}, ['test'], new Request(), HttpKernelInterface::MAIN_REQUEST);
+        $event = new ControllerArgumentsEvent(new TestHttpKernel(), static function () {}, ['test'], new Request(), HttpKernelInterface::MAIN_REQUEST);
         $this->assertSame(['test'], $event->getArguments());
     }
 
     public function testSetAttributes()
     {
-        $controller = function () {};
+        $controller = static function () {};
         $event = new ControllerArgumentsEvent(new TestHttpKernel(), $controller, ['test'], new Request(), HttpKernelInterface::MAIN_REQUEST);
         $event->setController($controller, []);
 
