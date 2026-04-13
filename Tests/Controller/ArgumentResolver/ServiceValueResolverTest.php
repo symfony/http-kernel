@@ -40,8 +40,8 @@ class ServiceValueResolverTest extends TestCase
     public function testExistingController()
     {
         $resolver = new ServiceValueResolver(new ServiceLocator([
-            'App\\Controller\\Mine::method' => fn () => new ServiceLocator([
-                'dummy' => fn () => new DummyService(),
+            'App\\Controller\\Mine::method' => static fn () => new ServiceLocator([
+                'dummy' => static fn () => new DummyService(),
             ]),
         ]));
 
@@ -54,8 +54,8 @@ class ServiceValueResolverTest extends TestCase
     public function testExistingControllerWithATrailingBackSlash()
     {
         $resolver = new ServiceValueResolver(new ServiceLocator([
-            'App\\Controller\\Mine::method' => fn () => new ServiceLocator([
-                'dummy' => fn () => new DummyService(),
+            'App\\Controller\\Mine::method' => static fn () => new ServiceLocator([
+                'dummy' => static fn () => new DummyService(),
             ]),
         ]));
 
@@ -68,8 +68,8 @@ class ServiceValueResolverTest extends TestCase
     public function testExistingControllerWithMethodNameStartUppercase()
     {
         $resolver = new ServiceValueResolver(new ServiceLocator([
-            'App\\Controller\\Mine::method' => fn () => new ServiceLocator([
-                'dummy' => fn () => new DummyService(),
+            'App\\Controller\\Mine::method' => static fn () => new ServiceLocator([
+                'dummy' => static fn () => new DummyService(),
             ]),
         ]));
         $request = $this->requestWithAttributes(['_controller' => 'App\\Controller\\Mine::Method']);
@@ -81,8 +81,8 @@ class ServiceValueResolverTest extends TestCase
     public function testControllerNameIsAnArray()
     {
         $resolver = new ServiceValueResolver(new ServiceLocator([
-            'App\\Controller\\Mine::method' => fn () => new ServiceLocator([
-                'dummy' => fn () => new DummyService(),
+            'App\\Controller\\Mine::method' => static fn () => new ServiceLocator([
+                'dummy' => static fn () => new DummyService(),
             ]),
         ]));
 

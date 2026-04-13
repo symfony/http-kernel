@@ -35,7 +35,7 @@ class ControllerResolverTest extends TestCase
         $resolver = $this->createControllerResolver();
 
         $request = Request::create('/');
-        $request->attributes->set('_controller', $lambda = function () {});
+        $request->attributes->set('_controller', $lambda = static function () {});
         $controller = $resolver->getController($request);
         $this->assertSame($lambda, $controller);
     }
@@ -118,7 +118,7 @@ class ControllerResolverTest extends TestCase
     {
         $resolver = $this->createControllerResolver();
 
-        $closure = fn () => 'test';
+        $closure = static fn () => 'test';
 
         $request = Request::create('/');
         $request->attributes->set('_controller', $closure);

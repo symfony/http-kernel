@@ -182,7 +182,7 @@ class CacheAttributeListenerTest extends TestCase
         $request->headers->add(['If-Modified-Since' => 'Fri, 23 Aug 2013 00:00:00 GMT']);
 
         $listener = new CacheAttributeListener();
-        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), fn (TestEntity $test) => new Response(), [$entity], $request, null);
+        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), static fn (TestEntity $test) => new Response(), [$entity], $request, null);
 
         $listener->onKernelControllerArguments($controllerArgumentsEvent);
         $response = $controllerArgumentsEvent->getController()($entity);
@@ -202,7 +202,7 @@ class CacheAttributeListenerTest extends TestCase
         $request->attributes->set('date', new \DateTimeImmutable('Fri, 23 Aug 2013 00:00:00 GMT'));
 
         $listener = new CacheAttributeListener();
-        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), fn (TestEntity $test) => new Response(), [$entity], $request, null);
+        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), static fn (TestEntity $test) => new Response(), [$entity], $request, null);
         $listener->onKernelControllerArguments($controllerArgumentsEvent);
 
         $controllerResponse = $controllerArgumentsEvent->getController()($entity);
@@ -229,7 +229,7 @@ class CacheAttributeListenerTest extends TestCase
         $request->headers->add(['If-None-Match' => \sprintf('"%s"', hash('sha256', $entity->getId()))]);
 
         $listener = new CacheAttributeListener();
-        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), fn (TestEntity $test) => new Response(), [$entity], $request, null);
+        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), static fn (TestEntity $test) => new Response(), [$entity], $request, null);
 
         $listener->onKernelControllerArguments($controllerArgumentsEvent);
         $response = $controllerArgumentsEvent->getController()($entity);
@@ -249,7 +249,7 @@ class CacheAttributeListenerTest extends TestCase
         $request->attributes->set('id', '12345');
 
         $listener = new CacheAttributeListener();
-        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), fn (TestEntity $test) => new Response(), [$entity], $request, null);
+        $controllerArgumentsEvent = new ControllerArgumentsEvent($this->getKernel(), static fn (TestEntity $test) => new Response(), [$entity], $request, null);
         $listener->onKernelControllerArguments($controllerArgumentsEvent);
 
         $controllerResponse = $controllerArgumentsEvent->getController()($entity);

@@ -437,7 +437,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
         $oldContainer = \is_object($this->container) ? new \ReflectionClass($this->container) : $this->container = null;
 
         try {
-            is_dir($buildDir) ?: mkdir($buildDir, 0777, true);
+            is_dir($buildDir) ?: mkdir($buildDir, 0o777, true);
 
             if ($lock = fopen($cachePath.'.lock', 'w+')) {
                 if (!flock($lock, \LOCK_EX | \LOCK_NB, $wouldBlock) && !flock($lock, $wouldBlock ? \LOCK_SH : \LOCK_EX)) {
@@ -460,7 +460,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
 
         if ($collectDeprecations = $this->debug && !\defined('PHPUNIT_COMPOSER_INSTALL')) {
             $collectedLogs = [];
-            $previousHandler = set_error_handler(function ($type, $message, $file, $line) use (&$collectedLogs, &$previousHandler) {
+            $previousHandler = set_error_handler(static function ($type, $message, $file, $line) use (&$collectedLogs, &$previousHandler) {
                 if (\E_USER_DEPRECATED !== $type && \E_DEPRECATED !== $type) {
                     return $previousHandler ? $previousHandler($type, $message, $file, $line) : false;
                 }
@@ -736,7 +736,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
 
         foreach ($content as $file => $code) {
             $fs->dumpFile($dir.$file, $code);
-            @chmod($dir.$file, 0666 & ~umask());
+            @chmod($dir.$file, 0o666 & ~umask());
         }
         $legacyFile = \dirname($dir.key($content)).'.legacy';
         if (is_file($legacyFile)) {
