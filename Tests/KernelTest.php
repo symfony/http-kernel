@@ -245,8 +245,11 @@ class KernelTest extends TestCase
         $kernel->handle($request, $type, $catch);
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getStripCommentsCodes')]
-    #[\PHPUnit\Framework\Attributes\Group('legacy')]
+    /**
+     * @dataProvider getStripCommentsCodes
+     *
+     * @group legacy
+     */
     public function testStripComments(string $source, string $expected)
     {
         $this->expectDeprecation('Since symfony/http-kernel 6.4: Method "Symfony\Component\HttpKernel\Kernel::stripComments()" is deprecated without replacement.');
@@ -658,7 +661,9 @@ class KernelTest extends TestCase
         $this->assertSame('cached: /worker-second', $secondResponse->getContent());
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('time-sensitive')]
+    /**
+     * @group time-sensitive
+     */
     public function testKernelStartTimeIsResetWhileBootingAlreadyBootedKernel()
     {
         $kernel = new KernelForTest('test', true);
@@ -692,7 +697,9 @@ class KernelTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*TestDebugContainer$/', $kernel->getContainerClass());
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('legacy')]
+    /**
+     * @group legacy
+     */
     public function testKernelWithParameterDeprecation()
     {
         $kernel = new class('test', true) extends Kernel {
