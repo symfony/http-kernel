@@ -189,7 +189,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
             ], ',', '"', '\\');
             fclose($file);
 
-            if (1 === mt_rand(1, 10)) {
+            if (1 === random_int(1, 10)) {
                 $this->removeExpiredProfiles();
             }
         }
