@@ -99,15 +99,15 @@ class HttpKernelBrowser extends AbstractBrowser
         }
 
         $code = <<<EOF
-<?php
+            <?php
 
-error_reporting($errorReporting);
+            error_reporting($errorReporting);
 
-$requires
+            $requires
 
-\$kernel = unserialize($kernel);
-\$request = unserialize($request);
-EOF;
+            \$kernel = unserialize($kernel);
+            \$request = unserialize($request);
+            EOF;
 
         return $code.$this->getHandleScript();
     }
@@ -118,14 +118,14 @@ EOF;
     protected function getHandleScript()
     {
         return <<<'EOF'
-$response = $kernel->handle($request);
+            $response = $kernel->handle($request);
 
-if ($kernel instanceof Symfony\Component\HttpKernel\TerminableInterface) {
-    $kernel->terminate($request, $response);
-}
+            if ($kernel instanceof Symfony\Component\HttpKernel\TerminableInterface) {
+                $kernel->terminate($request, $response);
+            }
 
-echo serialize($response);
-EOF;
+            echo serialize($response);
+            EOF;
     }
 
     protected function filterRequest(DomRequest $request): Request
