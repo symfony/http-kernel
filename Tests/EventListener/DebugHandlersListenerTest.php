@@ -126,7 +126,7 @@ class DebugHandlersListenerTest extends TestCase
 
     public function testReplaceExistingExceptionHandler()
     {
-        $userHandler = function () {};
+        $userHandler = static function () {};
         $listener = new DebugHandlersListener($userHandler);
         $eHandler = new ErrorHandler();
         $eHandler->setExceptionHandler('var_dump');

@@ -80,7 +80,7 @@ class HttpKernelBrowserTest extends TestCase
         $r = new \ReflectionObject($client);
         $m = $r->getMethod('filterResponse');
 
-        $response = new StreamedResponse(function () {
+        $response = new StreamedResponse(static function () {
             echo 'foo';
         });
 

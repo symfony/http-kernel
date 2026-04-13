@@ -36,7 +36,7 @@ class ArgumentResolverTest extends TestCase
     public static function getResolver(array $chainableResolvers = [], ?array $namedResolvers = null): ArgumentResolver
     {
         if (null !== $namedResolvers) {
-            $namedResolvers = new ServiceLocator(array_map(fn ($resolver) => fn () => $resolver, $namedResolvers));
+            $namedResolvers = new ServiceLocator(array_map(static fn ($resolver) => static fn () => $resolver, $namedResolvers));
         }
 
         return new ArgumentResolver(new ArgumentMetadataFactory(), $chainableResolvers, $namedResolvers);
@@ -88,7 +88,7 @@ class ArgumentResolverTest extends TestCase
     {
         $request = Request::create('/');
         $request->attributes->set('foo', 'foo');
-        $controller = function ($foo) {};
+        $controller = static function ($foo) {};
 
         $this->assertEquals(['foo'], self::getResolver()->getArguments($request, $controller));
     }
@@ -97,7 +97,7 @@ class ArgumentResolverTest extends TestCase
     {
         $request = Request::create('/');
         $request->attributes->set('foo', 'foo');
-        $controller = function ($foo, $bar = 'bar') {};
+        $controller = static function ($foo, $bar = 'bar') {};
 
         $this->assertEquals(['foo', 'bar'], self::getResolver()->getArguments($request, $controller));
     }
