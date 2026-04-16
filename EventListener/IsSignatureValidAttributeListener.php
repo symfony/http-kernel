@@ -37,8 +37,7 @@ class IsSignatureValidAttributeListener implements EventSubscriberInterface
 
         $request = $event->getRequest();
         foreach ($attributes as $attribute) {
-            $methods = array_map('strtoupper', $attribute->methods);
-            if ($methods && !\in_array($request->getMethod(), $methods, true)) {
+            if ($attribute->methods && !\in_array($request->getMethod(), $attribute->methods, true)) {
                 continue;
             }
 
