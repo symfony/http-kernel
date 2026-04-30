@@ -121,6 +121,17 @@ class RateLimitAttributeListenerTest extends TestCase
         $this->assertSame('5.6.7.8', $usedKey);
     }
 
+    public function testNonStringKeyThrows()
+    {
+        $this->expectException(\TypeError::class);
+        $this->expectExceptionMessage('must evaluate to a string, "int" given');
+
+        $this->makeListener()->onKernelControllerAttribute($this->makeEvent(
+            new RateLimit('api', key: static fn () => 42),
+            Request::create('/'),
+        ));
+    }
+
     public function testMethodFilterSkipsNonMatchingMethod()
     {
         $factory = $this->createMock(RateLimiterFactoryInterface::class);

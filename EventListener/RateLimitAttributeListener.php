@@ -52,8 +52,8 @@ final class RateLimitAttributeListener implements EventSubscriberInterface
 
         if (null === $attribute->key) {
             $key = ($request->getClientIp() ?? 'unknown').'~'.$request->getMethod().'~'.$request->getPathInfo();
-        } else {
-            $key = (string) $event->evaluate($attribute->key);
+        } elseif (!\is_string($key = $event->evaluate($attribute->key))) {
+            throw new \TypeError(\sprintf('The value of the "$key" option of the "%s" attribute must evaluate to a string, "%s" given.', RateLimit::class, get_debug_type($key)));
         }
 
         $rateLimit = $this->limiters->get($attribute->limiter)->create($key)->consume($attribute->tokens);
