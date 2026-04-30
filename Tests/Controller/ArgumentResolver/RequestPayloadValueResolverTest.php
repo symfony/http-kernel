@@ -360,8 +360,8 @@ class RequestPayloadValueResolverTest extends TestCase
             $this->assertSame(422, $e->getStatusCode());
             $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
             $this->assertContains($validationFailedException->getViolations()[0]->getMessage(), [
+                'This value was of an unexpected type.',
                 'This value should be of type int|string.',
-                'The data must belong to a backed enumeration of type Symfony\\Component\\HttpKernel\\Tests\\Controller\\ArgumentResolver\\RequestMethod',
             ]);
         }
     }
