@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpKernel\DataCollector;
 
+use Composer\InstalledVersions;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
@@ -45,7 +46,7 @@ class ConfigDataCollector extends DataCollector implements LateDataCollectorInte
 
         $this->data = [
             'token' => $response->headers->get('X-Debug-Token'),
-            'symfony_version' => Kernel::VERSION,
+            'symfony_version' => class_exists(InstalledVersions::class) ? InstalledVersions::getPrettyVersion('symfony/http-kernel') ?? InstalledVersions::getPrettyVersion('symfony/symfony') : Kernel::MAJOR_VERSION.'.'.Kernel::MINOR_VERSION,
             'symfony_minor_version' => \sprintf('%s.%s', Kernel::MAJOR_VERSION, Kernel::MINOR_VERSION),
             'symfony_lts' => 4 === Kernel::MINOR_VERSION,
             'symfony_state' => $this->determineSymfonyState(),
