@@ -31,6 +31,7 @@ CHANGELOG
  * Deprecate `MergeExtensionConfigurationPass`, use the one from the DependencyInjection component instead
  * Deprecate `FileLocator`, use the one from the DependencyInjection component instead
  * Add `#[RateLimit]` attribute to declaratively enforce rate limiting on controllers.
+ * Deprecate `ServicesResetter`, `ServicesResetterInterface`, and `ResettableServicePass`, use the ones from the DependencyInjection component instead
 
 8.0
 ---
