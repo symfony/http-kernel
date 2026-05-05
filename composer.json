@@ -59,6 +59,7 @@
         "symfony/http-client-contracts": "<2.5",
         "symfony/translation-contracts": "<2.5",
         "symfony/var-dumper": "<8.1",
+        "symfony/web-profiler-bundle": "<8.1",
         "twig/twig": "<3.21"
     },
     "autoload": {
