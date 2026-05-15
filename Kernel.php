@@ -243,6 +243,14 @@ abstract class Kernel extends AbstractKernel implements KernelInterface, Reboota
             $this->startTime = microtime(true);
         }
 
+        if ($this->debug && !isset($_ENV['SHELL_VERBOSITY']) && !isset($_SERVER['SHELL_VERBOSITY'])) {
+            if (\function_exists('putenv')) {
+                putenv('SHELL_VERBOSITY=3');
+            }
+            $_ENV['SHELL_VERBOSITY'] = 3;
+            $_SERVER['SHELL_VERBOSITY'] = 3;
+        }
+
         $this->initializeBundles();
         $this->initializeContainer();
 

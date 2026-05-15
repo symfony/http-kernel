@@ -139,6 +139,40 @@ class KernelTest extends TestCase
         $kernel->boot();
     }
 
+    public function testDebugBootSetsShellVerbosity()
+    {
+        $envBackup = $_ENV['SHELL_VERBOSITY'] ?? null;
+        $serverBackup = $_SERVER['SHELL_VERBOSITY'] ?? null;
+        $getenvBackup = getenv('SHELL_VERBOSITY');
+        unset($_ENV['SHELL_VERBOSITY'], $_SERVER['SHELL_VERBOSITY']);
+        putenv('SHELL_VERBOSITY');
+
+        try {
+            $kernel = new KernelForTest('test', true);
+            $kernel->boot();
+
+            $this->assertSame(3, $_ENV['SHELL_VERBOSITY']);
+            $this->assertSame(3, $_SERVER['SHELL_VERBOSITY']);
+            $this->assertSame('3', getenv('SHELL_VERBOSITY'));
+        } finally {
+            if (null === $envBackup) {
+                unset($_ENV['SHELL_VERBOSITY']);
+            } else {
+                $_ENV['SHELL_VERBOSITY'] = $envBackup;
+            }
+            if (null === $serverBackup) {
+                unset($_SERVER['SHELL_VERBOSITY']);
+            } else {
+                $_SERVER['SHELL_VERBOSITY'] = $serverBackup;
+            }
+            if (false === $getenvBackup) {
+                putenv('SHELL_VERBOSITY');
+            } else {
+                putenv('SHELL_VERBOSITY='.$getenvBackup);
+            }
+        }
+    }
+
     public function testBootSetsTheBootedFlagToTrue()
     {
         // use test kernel to access isBooted()

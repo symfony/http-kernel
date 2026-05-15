@@ -46,9 +46,11 @@ class ControllerAttributesListener implements EventSubscriberInterface
     public function beforeController(ControllerEvent|ControllerArgumentsEvent $event, string $eventName, EventDispatcherInterface $dispatcher): void
     {
         $controller = $event->getController();
+        $attributes = $event->getAttributes('*');
+        $swapBudget = \count($attributes) << 3;
 
         dispatch_attributes:
-        foreach ($event->getAttributes('*') as $attribute) {
+        foreach ($attributes as $attribute) {
             if (!$attributeEventNames = $this->getAttributeEventNames($attribute, $eventName)) {
                 continue;
             }
@@ -63,7 +65,11 @@ class ControllerAttributesListener implements EventSubscriberInterface
 
             $c = $event->getController();
             if ($c instanceof \Closure ? $c != $controller : $c !== $controller) {
+                if (--$swapBudget < 0) {
+                    throw new \LogicException(\sprintf('Controller swap loop detected while dispatching attributes for event "%s"; a listener keeps changing the controller.', $eventName));
+                }
                 $controller = $c;
+                $attributes = $event->getAttributes('*');
                 goto dispatch_attributes;
             }
         }

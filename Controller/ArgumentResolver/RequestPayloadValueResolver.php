@@ -147,6 +147,13 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
                         $message = $trans($template, $parameters, $this->translationDomain);
                         $violations->add(new ConstraintViolation($message, $template, $parameters, null, $error->getPath(), null));
                     }
+                    if (null !== $extraAttributesError = method_exists($e, 'getExtraAttributesError') ? $e->getExtraAttributesError() : null) {
+                        $template = 'This attribute was not expected.';
+                        foreach ($extraAttributesError->getExtraAttributes() as $extraAttribute) {
+                            $message = $trans($template, [], $this->translationDomain);
+                            $violations->add(new ConstraintViolation($message, $template, [], null, $extraAttribute, null));
+                        }
+                    }
                     $payload = $e->getData();
                 } catch (SerializerInvalidArgumentException $e) {
                     $violations->add(new ConstraintViolation($e->getMessage(), $e->getMessage(), [], null, '', null));

@@ -13,6 +13,8 @@ namespace Symfony\Component\HttpKernel\Config;
 
 use Symfony\Component\DependencyInjection\Kernel\FileLocator as BaseFileLocator;
 
+trigger_deprecation('symfony/http-kernel', '8.1', 'The "%s" class is deprecated, use "%s" instead.', FileLocator::class, BaseFileLocator::class);
+
 /**
  * @deprecated since Symfony 8.1, use Symfony\Component\DependencyInjection\Kernel\FileLocator instead
  */

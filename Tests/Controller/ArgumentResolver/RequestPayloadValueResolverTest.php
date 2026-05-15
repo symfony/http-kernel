@@ -12,6 +12,7 @@
 namespace Symfony\Component\HttpKernel\Tests\Controller\ArgumentResolver;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresMethod;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -32,6 +33,7 @@ use Symfony\Component\HttpKernel\Tests\Fixtures\Controller\BasicTypesController;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
@@ -471,6 +473,34 @@ class RequestPayloadValueResolverTest extends TestCase
         $event = new ControllerArgumentsEvent($this->createStub(HttpKernelInterface::class), static function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
 
         $resolver->onKernelControllerArguments($event);
+    }
+
+    #[RequiresMethod(PartialDenormalizationException::class, 'getExtraAttributesError')]
+    public function testExtraAttributesErrorsAreSurfacedAsViolations()
+    {
+        $serializer = $this->createStub(SerializerDenormalizer::class);
+        $serializer->method('deserialize')->willThrowException(new PartialDenormalizationException([], [], [new ExtraAttributesException(['foo', 'bar'])]));
+
+        $resolver = new RequestPayloadValueResolver($serializer, (new ValidatorBuilder())->getValidator());
+        $request = Request::create('/', 'POST', [], [], [], ['CONTENT_TYPE' => 'application/json'], '{"foo": 1, "bar": 2}');
+        $arguments = $resolver->resolve($request, new ArgumentMetadata('valid', RequestPayload::class, false, false, null, false, [
+            MapRequestPayload::class => new MapRequestPayload(),
+        ]));
+        $event = new ControllerArgumentsEvent($this->createStub(HttpKernelInterface::class), static function () {}, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+
+        try {
+            $resolver->onKernelControllerArguments($event);
+            $this->fail(\sprintf('Expected "%s" to be thrown.', HttpException::class));
+        } catch (HttpException $e) {
+            $validationFailedException = $e->getPrevious();
+            $this->assertInstanceOf(ValidationFailedException::class, $validationFailedException);
+            $violations = $validationFailedException->getViolations();
+            $this->assertCount(2, $violations);
+            $this->assertSame('This attribute was not expected.', $violations[0]->getMessage());
+            $this->assertSame('foo', $violations[0]->getPropertyPath());
+            $this->assertSame('This attribute was not expected.', $violations[1]->getMessage());
+            $this->assertSame('bar', $violations[1]->getPropertyPath());
+        }
     }
 
     public function testQueryStringValidationPassed()
