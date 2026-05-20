@@ -167,7 +167,7 @@ class IsSignatureValidAttributeListenerTest extends TestCase
 
         $signer = $this->createMock(UriSigner::class);
         $signer->expects($this->once())->method('verify')->with($request);
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
 
         $event = new ControllerArgumentsEvent(
             $kernel,
