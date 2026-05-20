@@ -193,6 +193,26 @@ class IsSignatureValidAttributeListenerTest extends TestCase
         $listener->onKernelControllerArguments($event);
     }
 
+    public function testValidationAppliedForHeadMethodWhenGetIsConfigured()
+    {
+        $request = new Request([], [], [], [], [], ['REQUEST_METHOD' => 'HEAD']);
+
+        $signer = $this->createMock(UriSigner::class);
+        $signer->expects($this->once())->method('verify')->with($request);
+        $kernel = $this->createStub(HttpKernelInterface::class);
+
+        $event = new ControllerArgumentsEvent(
+            $kernel,
+            [new IsSignatureValidAttributeMethodsController(), 'withGetAndPost'],
+            [],
+            $request,
+            null
+        );
+
+        $listener = new IsSignatureValidAttributeListener($signer);
+        $listener->onKernelControllerArguments($event);
+    }
+
     public function testValidationSkippedForNonMatchingMethod()
     {
         $request = new Request([], [], [], [], [], ['REQUEST_METHOD' => 'GET']);

@@ -42,6 +42,9 @@ final class RateLimit
             throw new \InvalidArgumentException(\sprintf('The "$tokens" argument of "%s" must be greater than 0, "%d" given.', self::class, $this->tokens));
         }
 
-        $this->methods = array_map('strtoupper', (array) $methods);
+        if (\in_array('GET', $methods = array_map('strtoupper', (array) $methods), true)) {
+            $methods[] = 'HEAD';
+        }
+        $this->methods = $methods;
     }
 }

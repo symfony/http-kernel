@@ -35,6 +35,6 @@ class RateLimitTest extends TestCase
     public function testMethodsAreNormalized()
     {
         $rl = new RateLimit('api', methods: ['get', 'post']);
-        $this->assertSame(['GET', 'POST'], $rl->methods);
+        $this->assertSame(['GET', 'POST', 'HEAD'], $rl->methods);
     }
 }
