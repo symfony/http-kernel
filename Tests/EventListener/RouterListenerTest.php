@@ -14,6 +14,7 @@ namespace Symfony\Component\HttpKernel\Tests\EventListener;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -211,15 +212,20 @@ class RouterListenerTest extends TestCase
 
     public function testRequestWithBadHost()
     {
-        $this->expectException(BadRequestHttpException::class);
         $kernel = $this->createMock(HttpKernelInterface::class);
-        $request = Request::create('http://bad host %22/');
+        $request = Request::create('/');
+        $request->headers->set('host', 'bad host %22');
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
 
         $requestMatcher = $this->createMock(RequestMatcherInterface::class);
 
         $listener = new RouterListener($requestMatcher, $this->requestStack, new RequestContext());
-        $listener->onKernelRequest($event);
+        try {
+            $listener->onKernelRequest($event);
+            self::fail(sprintf('Expected "%s" or "%s" to be thrown.', BadRequestHttpException::class, BadRequestException::class));
+        } catch (\Throwable $e) {
+            $this->assertTrue($e instanceof BadRequestHttpException || $e instanceof BadRequestException);
+        }
     }
 
     public function testResourceNotFoundException()
