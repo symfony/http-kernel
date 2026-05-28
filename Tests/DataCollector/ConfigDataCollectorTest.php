@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpKernel\Tests\DataCollector;
 
+use Composer\InstalledVersions;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,7 +36,7 @@ class ConfigDataCollectorTest extends TestCase
         $this->assertSame(\PHP_INT_SIZE * 8, $c->getPhpArchitecture());
         $this->assertSame(class_exists(\Locale::class, false) && \Locale::getDefault() ? \Locale::getDefault() : 'n/a', $c->getPhpIntlLocale());
         $this->assertSame(date_default_timezone_get(), $c->getPhpTimezone());
-        $this->assertSame(Kernel::VERSION, $c->getSymfonyVersion());
+        $this->assertSame(InstalledVersions::getPrettyVersion('symfony/http-kernel') ?? InstalledVersions::getPrettyVersion('symfony/symfony'), $c->getSymfonyVersion());
         $this->assertSame(4 === Kernel::MINOR_VERSION, $c->isSymfonyLts());
         $this->assertNull($c->getToken());
         $this->assertSame(\extension_loaded('xdebug'), $c->hasXDebug());
@@ -63,7 +64,7 @@ class ConfigDataCollectorTest extends TestCase
         $this->assertSame(\PHP_INT_SIZE * 8, $c->getPhpArchitecture());
         $this->assertSame(class_exists(\Locale::class, false) && \Locale::getDefault() ? \Locale::getDefault() : 'n/a', $c->getPhpIntlLocale());
         $this->assertSame(date_default_timezone_get(), $c->getPhpTimezone());
-        $this->assertSame(Kernel::VERSION, $c->getSymfonyVersion());
+        $this->assertSame(InstalledVersions::getPrettyVersion('symfony/http-kernel') ?? InstalledVersions::getPrettyVersion('symfony/symfony'), $c->getSymfonyVersion());
         $this->assertSame(4 === Kernel::MINOR_VERSION, $c->isSymfonyLts());
         $this->assertNull($c->getToken());
         $this->assertSame(\extension_loaded('xdebug'), $c->hasXDebug());
