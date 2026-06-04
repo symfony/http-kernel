@@ -19,6 +19,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
  * Event dispatched for each controller attribute.
  *
  * @template T of object
+ * @template U of KernelEvent
  *
  * @author Nicolas Grekas <p@tchwork.com>
  */
@@ -28,10 +29,12 @@ final class ControllerAttributeEvent implements StoppableEventInterface
 
     /**
      * @param T $attribute
+     * @param U $kernelEvent
      */
     public function __construct(
         /** @var T */
         public readonly object $attribute,
+        /** @var U */
         public readonly KernelEvent $kernelEvent,
         private readonly ?ExpressionLanguage $expressionLanguage = null,
     ) {
