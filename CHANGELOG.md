@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+8.2
+---
+
+ * Add `#[AsControllerAttributeListener]` attribute to declare event listeners for controller attributes
+
 8.1
 ---
 
