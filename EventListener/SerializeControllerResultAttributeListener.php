@@ -32,7 +32,7 @@ final class SerializeControllerResultAttributeListener implements EventSubscribe
     }
 
     /**
-     * @param ControllerAttributeEvent<Serialize> $event
+     * @param ControllerAttributeEvent<Serialize, ViewEvent> $event
      */
     public function onView(ControllerAttributeEvent $event): void
     {

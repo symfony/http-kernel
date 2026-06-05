@@ -216,7 +216,7 @@ class HttpKernel implements HttpKernelInterface, TerminableInterface
      */
     private function filterResponse(Response $response, Request $request, int $type, ?ControllerMetadata $controllerMetadata = null): Response
     {
-        $event = new ResponseEvent($this, $request, $type, $response, $controllerMetadata);
+        $event = new ResponseEvent($this, $request, $type, $response, $controllerMetadata instanceof ControllerArgumentsMetadata ? $controllerMetadata : null);
 
         $this->dispatcher->dispatch($event, KernelEvents::RESPONSE);
 

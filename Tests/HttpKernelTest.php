@@ -553,6 +553,31 @@ class HttpKernelTest extends TestCase
         $this->assertSame(['meta'], $capturedArguments);
     }
 
+    public function testResponseEventWhenArgumentResolutionThrows()
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(KernelEvents::EXCEPTION, static function ($event) {
+            $event->setResponse(new Response('handled', 400));
+        });
+
+        $controllerResolver = $this->createStub(ControllerResolverInterface::class);
+        $controllerResolver
+            ->method('getController')
+            ->willReturn(static fn () => new Response('never'));
+
+        $argumentResolver = $this->createStub(ArgumentResolverInterface::class);
+        $argumentResolver
+            ->method('getArguments')
+            ->willThrowException(new BadRequestHttpException('boom'));
+
+        $kernel = new HttpKernel($dispatcher, $controllerResolver, null, $argumentResolver);
+
+        $response = $kernel->handle(new Request(), HttpKernelInterface::MAIN_REQUEST, true);
+
+        $this->assertSame('handled', $response->getContent());
+        $this->assertSame(400, $response->getStatusCode());
+    }
+
     public function testFinishRequestEventKeepsControllerMetadata()
     {
         $dispatcher = new EventDispatcher();

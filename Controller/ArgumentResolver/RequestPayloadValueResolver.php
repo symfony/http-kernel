@@ -209,8 +209,10 @@ class RequestPayloadValueResolver implements ValueResolverInterface, EventSubscr
 
     public static function getSubscribedEvents(): array
     {
+        // Keep this priority lower than ControllerAttributesListener (-10000) so that gate
+        // attributes such as #[IsGranted] are handled before the payload is mapped.
         return [
-            KernelEvents::CONTROLLER_ARGUMENTS => 'onKernelControllerArguments',
+            KernelEvents::CONTROLLER_ARGUMENTS => ['onKernelControllerArguments', -10100],
         ];
     }
 
