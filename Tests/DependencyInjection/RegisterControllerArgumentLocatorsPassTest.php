@@ -560,6 +560,26 @@ class RegisterControllerArgumentLocatorsPassTest extends TestCase
         $container->compile();
     }
 
+    public function testAutowireAttributeNullableInvalidReferenceResolvesToNull()
+    {
+        $container = new ContainerBuilder();
+        $resolver = $container->register('argument_resolver.service', 'stdClass')->addArgument([]);
+
+        $container->register('foo', WithAutowireAttributeNullableInvalidReference::class)
+            ->addTag('controller.service_arguments');
+
+        (new RegisterControllerArgumentLocatorsPass())->process($container);
+
+        $locatorId = (string) $resolver->getArgument(0);
+        $container->getDefinition($locatorId)->setPublic(true);
+        $container->compile();
+
+        /** @var ServiceLocator $locator */
+        $locator = $container->get($locatorId)->get('foo::invalidReference');
+
+        $this->assertNull($locator->get('service'));
+    }
+
     #[IgnoreDeprecations]
     #[Group('legacy')]
     public function testTaggedIteratorAndTaggedLocatorAttributes()
@@ -831,7 +851,16 @@ class WithAutowireAttributeInvalidReference
 {
     public function invalidReference(
         #[Autowire(service: 'invalid.id')]
-        ?\stdClass $service2 = null,
+        \stdClass $service2,
+    ) {
+    }
+}
+
+class WithAutowireAttributeNullableInvalidReference
+{
+    public function invalidReference(
+        #[Autowire(service: 'invalid.id')]
+        ?\stdClass $service,
     ) {
     }
 }
