@@ -53,13 +53,21 @@ final class RequestAttributeValueResolver implements ValueResolverInterface
             }
 
             $value = (string) $value;
-        } elseif ($filter = match ($type) {
-            'int' => \FILTER_VALIDATE_INT,
-            'float' => \FILTER_VALIDATE_FLOAT,
-            'bool' => \FILTER_VALIDATE_BOOL,
+        } elseif ('bool' === $type) {
+            if (null === $value = filter_var($value, \FILTER_VALIDATE_BOOL, ['flags' => \FILTER_NULL_ON_FAILURE | \FILTER_REQUIRE_SCALAR])) {
+                throw new NotFoundHttpException(\sprintf('The value for the "%s" route parameter is invalid.', $name));
+            }
+        } elseif (null !== $cast = match ($type) {
+            'int' => static fn (int $v): int => $v,
+            'float' => static fn (float $v): float => $v,
             default => null,
         }) {
-            if (null === $value = $request->attributes->filter($name, null, $filter, ['flags' => \FILTER_NULL_ON_FAILURE | \FILTER_REQUIRE_SCALAR])) {
+            // Coerce the value as PHP would when passing it to the typed controller
+            // argument, so a zero-padded "06" still resolves to 6 while a value that
+            // would raise a TypeError (overflow, "abc") becomes a 404.
+            try {
+                $value = $cast($value);
+            } catch (\TypeError) {
                 throw new NotFoundHttpException(\sprintf('The value for the "%s" route parameter is invalid.', $name));
             }
         }
