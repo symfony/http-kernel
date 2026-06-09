@@ -313,7 +313,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
             $data = @gzdecode($data) ?: $data;
         }
 
-        if (!$data = unserialize($data)) {
+        if (!$data = unserialize($data, ['allowed_classes' => true])) {
             return null;
         }
 
