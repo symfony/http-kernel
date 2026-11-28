@@ -50,7 +50,7 @@ class LoggerDataCollectorTest extends TestCase
 
     public function testCollectFromDeprecationsLog()
     {
-        $containerPathPrefix = __DIR__.'/';
+        $containerPathPrefix = sys_get_temp_dir().'/sf_http-kernel_'.hash('xxh32', __FILE__).'.';
         $path = $containerPathPrefix.'Deprecations.log';
         touch($path);
         file_put_contents($path, serialize([[
@@ -98,7 +98,7 @@ class LoggerDataCollectorTest extends TestCase
     {
         WakingPayload::reset();
 
-        $containerPathPrefix = __DIR__.'/';
+        $containerPathPrefix = sys_get_temp_dir().'/sf_http-kernel_'.hash('xxh32', __FILE__).'.';
         $path = $containerPathPrefix.'Deprecations.log';
         file_put_contents($path, serialize([[
             'type' => 16384,
