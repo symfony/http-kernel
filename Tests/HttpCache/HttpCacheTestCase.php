@@ -31,9 +31,11 @@ abstract class HttpCacheTestCase extends TestCase
     protected $catch;
     protected $esi;
     protected ?Store $store = null;
+    protected string $storeDir;
 
     protected function setUp(): void
     {
+        $this->storeDir = sys_get_temp_dir().'/sf_http-kernel_'.hash('xxh32', __FILE__);
         $this->kernel = null;
 
         $this->cache = null;
@@ -47,7 +49,7 @@ abstract class HttpCacheTestCase extends TestCase
 
         $this->catch = false;
 
-        $this->clearDirectory(sys_get_temp_dir().'/http_cache');
+        $this->clearDirectory($this->storeDir);
     }
 
     protected function tearDown(): void
@@ -63,7 +65,7 @@ abstract class HttpCacheTestCase extends TestCase
         $this->catch = null;
         $this->esi = null;
 
-        $this->clearDirectory(sys_get_temp_dir().'/http_cache');
+        $this->clearDirectory($this->storeDir);
     }
 
     public function assertHttpKernelIsCalled()
@@ -140,7 +142,7 @@ abstract class HttpCacheTestCase extends TestCase
     public function getMetaStorageValues()
     {
         $values = [];
-        foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(sys_get_temp_dir().'/http_cache/md', \RecursiveDirectoryIterator::SKIP_DOTS), \RecursiveIteratorIterator::LEAVES_ONLY) as $file) {
+        foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->storeDir.'/md', \RecursiveDirectoryIterator::SKIP_DOTS), \RecursiveIteratorIterator::LEAVES_ONLY) as $file) {
             $values[] = file_get_contents($file);
         }
 
@@ -188,6 +190,6 @@ abstract class HttpCacheTestCase extends TestCase
 
     protected function createStore(): Store
     {
-        return new Store(sys_get_temp_dir().'/http_cache');
+        return new Store($this->storeDir);
     }
 }

@@ -158,7 +158,7 @@ class HttpKernelBrowserTest extends TestCase
     {
         $source = tempnam(sys_get_temp_dir(), 'source');
         file_put_contents($source, '1');
-        $target = sys_get_temp_dir().'/sf.moved.file';
+        $target = sys_get_temp_dir().'/sf_http-kernel_'.hash('xxh32', __FILE__).'.file';
         @unlink($target);
 
         $kernel = new TestHttpKernel();

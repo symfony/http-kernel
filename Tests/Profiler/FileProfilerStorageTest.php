@@ -23,7 +23,7 @@ class FileProfilerStorageTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir().'/sf_profiler_file_storage';
+        $this->tmpDir = sys_get_temp_dir().'/sf_http-kernel_'.hash('xxh32', __FILE__);
         if (is_dir($this->tmpDir)) {
             self::cleanDir();
         }
