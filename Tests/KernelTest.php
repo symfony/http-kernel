@@ -782,6 +782,100 @@ class KernelTest extends TestCase
         }
     }
 
+    #[DataProvider('provideRemoteAddrAtBoot')]
+    public function testRemoteAddrTrustedProxyIsResolvedForEachMainRequest(bool $bootAhead, ?string $remoteAddr)
+    {
+        $isSecure = [];
+        $httpKernel = $this->createStub(HttpKernelInterface::class);
+        $httpKernel->method('handle')->willReturnCallback(static function (Request $request) use (&$isSecure) {
+            $isSecure[] = $request->isSecure();
+
+            return new Response();
+        });
+        $kernel = new CustomProjectDirKernel(static function (ContainerBuilder $container) {
+            $container->setParameter('kernel.trusted_proxies', '192.0.2.1,REMOTE_ADDR');
+            $container->setParameter('kernel.trusted_headers', 'x-forwarded-for,x-forwarded-proto');
+        }, $httpKernel);
+        $serverRemoteAddr = $this->setServerRemoteAddr($remoteAddr);
+
+        try {
+            if ($bootAhead) {
+                $kernel->boot();
+            }
+
+            $kernel->handle(Request::create('/', 'GET', [], [], [], ['REMOTE_ADDR' => '10.0.0.1', 'HTTP_X_FORWARDED_PROTO' => 'https']));
+            $kernel->handle(Request::create('/', 'GET', [], [], [], ['REMOTE_ADDR' => '10.0.0.2', 'HTTP_X_FORWARDED_PROTO' => 'https']));
+
+            $this->assertSame([true, true], $isSecure);
+            $this->assertSame(['192.0.2.1', '10.0.0.2'], Request::getTrustedProxies());
+            $this->assertSame(Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO, Request::getTrustedHeaderSet());
+        } finally {
+            $this->setServerRemoteAddr($serverRemoteAddr);
+            Request::setTrustedProxies([], 0);
+        }
+    }
+
+    public static function provideRemoteAddrAtBoot(): iterable
+    {
+        yield 'booted by the first request' => [false, '10.0.0.1'];
+        yield 'booted ahead of the first request' => [true, null];
+    }
+
+    public function testRemoteAddrTrustedProxyIsKeptForRequestsForwardedByHttpCache()
+    {
+        $clientIp = null;
+        $httpKernel = $this->createStub(HttpKernelInterface::class);
+        $httpKernel->method('handle')->willReturnCallback(static function (Request $request) use (&$clientIp) {
+            $clientIp = $request->getClientIp();
+
+            return new Response();
+        });
+        $kernel = new CustomProjectDirKernel(static function (ContainerBuilder $container) {
+            $container->setParameter('kernel.trusted_proxies', 'REMOTE_ADDR');
+            $container->setParameter('kernel.trusted_headers', 'x-forwarded-for');
+        }, $httpKernel);
+        $httpCache = new HttpCache($kernel, new Store(self::getVarDir().'/http_cache'));
+        $serverRemoteAddr = $this->setServerRemoteAddr('10.0.0.1');
+        Request::setTrustedProxies(['REMOTE_ADDR'], Request::HEADER_X_FORWARDED_FOR);
+
+        try {
+            $httpCache->handle(Request::create('/', 'GET', [], [], [], ['REMOTE_ADDR' => '10.0.0.1', 'HTTP_X_FORWARDED_FOR' => '203.0.113.7']));
+
+            $this->assertSame('203.0.113.7', $clientIp);
+            $this->assertSame(['10.0.0.1'], Request::getTrustedProxies());
+        } finally {
+            $this->setServerRemoteAddr($serverRemoteAddr);
+            Request::setTrustedProxies([], 0);
+        }
+    }
+
+    public function testTrustedProxiesChangedAfterTheKernelSetThemAreKept()
+    {
+        $httpKernel = $this->createStub(HttpKernelInterface::class);
+        $httpKernel->method('handle')->willReturn(new Response());
+        $kernel = new CustomProjectDirKernel(static function (ContainerBuilder $container) {
+            $container->setParameter('kernel.trusted_proxies', 'REMOTE_ADDR');
+            $container->setParameter('kernel.trusted_headers', 'x-forwarded-for');
+        }, $httpKernel);
+        $serverRemoteAddr = $this->setServerRemoteAddr(null);
+
+        try {
+            $kernel->boot();
+            Request::setTrustedProxies([...Request::getTrustedProxies(), '192.0.2.2'], Request::getTrustedHeaderSet());
+
+            $kernel->handle(Request::create('/', 'GET', [], [], [], ['REMOTE_ADDR' => '10.0.0.1']));
+            $this->assertSame(['10.0.0.1', '192.0.2.2'], Request::getTrustedProxies());
+
+            Request::setTrustedProxies(['192.0.2.3'], Request::getTrustedHeaderSet());
+
+            $kernel->handle(Request::create('/', 'GET', [], [], [], ['REMOTE_ADDR' => '10.0.0.2']));
+            $this->assertSame(['192.0.2.3'], Request::getTrustedProxies());
+        } finally {
+            $this->setServerRemoteAddr($serverRemoteAddr);
+            Request::setTrustedProxies([], 0);
+        }
+    }
+
     /**
      * Returns a mock for the abstract kernel.
      *
@@ -805,6 +899,19 @@ class KernelTest extends TestCase
         ;
 
         return $kernel;
+    }
+
+    private function setServerRemoteAddr(?string $remoteAddr): ?string
+    {
+        $previous = $_SERVER['REMOTE_ADDR'] ?? null;
+
+        if (null === $remoteAddr) {
+            unset($_SERVER['REMOTE_ADDR']);
+        } else {
+            $_SERVER['REMOTE_ADDR'] = $remoteAddr;
+        }
+
+        return $previous;
     }
 }
 

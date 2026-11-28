@@ -68,6 +68,7 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
     private int $requestStackSize = 0;
     private bool $resetServices = false;
     private bool $handlingHttpCache = false;
+    private ?string $remoteAddrTrustedProxy = null;
 
     /**
      * @var array<string, bool>
@@ -182,6 +183,16 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
     {
         if (!$this->container) {
             $this->preBoot();
+        }
+
+        // Resolve REMOTE_ADDR again for each main request, except for the ones forwarded by HttpCache, which come from 127.0.0.1
+        if (null !== $this->remoteAddrTrustedProxy && !$this->requestStackSize && !$this->handlingHttpCache && HttpKernelInterface::MAIN_REQUEST === $type && !$request->server->has(Request::SUB_REQUEST_TRUSTED_HEADER_SET)) {
+            $trustedProxies = Request::getTrustedProxies();
+
+            if (false !== $i = array_search($this->remoteAddrTrustedProxy, $trustedProxies, true)) {
+                $trustedProxies[$i] = $this->remoteAddrTrustedProxy = (string) $request->server->get('REMOTE_ADDR');
+                Request::setTrustedProxies($trustedProxies, Request::getTrustedHeaderSet());
+            }
         }
 
         if (HttpKernelInterface::MAIN_REQUEST === $type && !$this->handlingHttpCache && $this->container->has('http_cache')) {
@@ -789,6 +800,8 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
             Request::setTrustedHosts(\is_array($trustedHosts) ? $trustedHosts : preg_split('/\s*+,\s*+(?![^{]*})/', $trustedHosts));
         }
 
+        $this->remoteAddrTrustedProxy = null;
+
         if ($container->hasParameter('kernel.trusted_proxies') && $container->hasParameter('kernel.trusted_headers') && $trustedProxies = $container->getParameter('kernel.trusted_proxies')) {
             $trustedHeaders = $container->getParameter('kernel.trusted_headers');
 
@@ -809,7 +822,13 @@ abstract class Kernel implements KernelInterface, RebootableInterface, Terminabl
                 $trustedHeaderSet = $trustedHeaders ?? (Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO);
             }
 
-            Request::setTrustedProxies(\is_array($trustedProxies) ? $trustedProxies : array_map('trim', explode(',', $trustedProxies)), $trustedHeaderSet);
+            $trustedProxies = \is_array($trustedProxies) ? $trustedProxies : array_map('trim', explode(',', $trustedProxies));
+
+            if (false !== $i = array_search('REMOTE_ADDR', $trustedProxies, true)) {
+                $trustedProxies[$i] = $this->remoteAddrTrustedProxy = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+            }
+
+            Request::setTrustedProxies($trustedProxies, $trustedHeaderSet);
         }
 
         return $container;
