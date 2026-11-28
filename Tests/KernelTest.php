@@ -46,15 +46,13 @@ use Symfony\Component\HttpKernel\Tests\Fixtures\ResettableService;
 
 class KernelTest extends TestCase
 {
-    private static ?string $varDir = null;
-
     /**
      * Kernels of this test write their cache and logs out of the source tree: PHPUnit lists the files of
      * src/Symfony/ in parallel suites, and fails when it meets a directory that tearDown() is removing.
      */
     public static function getVarDir(): string
     {
-        return self::$varDir ??= sys_get_temp_dir().'/sf_kernel_test_'.bin2hex(random_bytes(4));
+        return sys_get_temp_dir().'/sf_http-kernel_'.hash('xxh32', __FILE__);
     }
 
     protected function tearDown(): void

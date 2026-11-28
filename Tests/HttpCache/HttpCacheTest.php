@@ -1054,7 +1054,7 @@ class HttpCacheTest extends HttpCacheTestCase
         $this->request('GET', '/'); // warm the cache
 
         // Use a store that simulates a cache entry being locked upon first attempt
-        $this->store = new class(sys_get_temp_dir().'/http_cache') extends Store {
+        $this->store = new class($this->storeDir) extends Store {
             private bool $hasLock = false;
 
             public function lock(Request $request): bool
@@ -2060,7 +2060,7 @@ class HttpCacheTest extends HttpCacheTestCase
 
     public function testBackendCannotSetBodyFileHeader()
     {
-        $file = sys_get_temp_dir().'/http_cache_local_file.txt';
+        $file = sys_get_temp_dir().'/sf_http-kernel_'.hash('xxh32', __FILE__).'.txt';
         file_put_contents($file, 'contents of a local file');
 
         try {
